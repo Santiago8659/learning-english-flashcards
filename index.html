@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Learning English · Flashcards</title>
+<title>Learning English · Hub</title>
 <style>
   :root {
     --bg: #0f1115;
@@ -27,445 +27,190 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 24px 16px;
+    padding: 32px 16px;
   }
   header {
     width: 100%;
-    max-width: 640px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-  h1 { font-size: 18px; margin: 0; font-weight: 600; }
-  .controls { display: flex; gap: 8px; align-items: center; }
-  select, .btn {
-    background: var(--panel);
-    color: var(--text);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 8px 12px;
-    font-size: 13px;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .btn:hover { background: var(--panel-2); }
-  .progress-wrap {
-    width: 100%;
-    max-width: 640px;
-    background: var(--panel);
-    height: 6px;
-    border-radius: 4px;
-    margin-bottom: 16px;
-    overflow: hidden;
-  }
-  .progress-bar {
-    height: 100%;
-    background: var(--accent);
-    width: 0%;
-    transition: width 0.3s;
-  }
-  .meta {
-    width: 100%;
-    max-width: 640px;
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    color: var(--muted);
-    margin-bottom: 12px;
-  }
-  .card {
-    width: 100%;
-    max-width: 640px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 40px 32px;
-    min-height: 320px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    cursor: pointer;
-    user-select: none;
-    transition: transform 0.15s;
-  }
-  .card:hover { transform: translateY(-1px); }
-  .card .pill {
-    display: inline-block;
-    padding: 3px 9px;
-    border-radius: 10px;
-    font-size: 11px;
-    background: var(--panel-2);
-    color: var(--muted);
-    margin-right: 6px;
-    margin-bottom: 12px;
-  }
-  .card .pill.cefr { color: var(--accent); }
-  .front-prompt { font-size: 14px; color: var(--muted); margin-bottom: 8px; }
-  .front-text { font-size: 32px; font-weight: 600; }
-  .back-word { font-size: 36px; font-weight: 700; margin-bottom: 8px; color: var(--accent); }
-  .back-pos { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
-  .back-meaning { font-size: 16px; line-height: 1.55; margin-bottom: 14px; }
-  .back-example { font-size: 15px; line-height: 1.5; color: var(--muted); font-style: italic; padding-left: 12px; border-left: 3px solid var(--border); }
-  .back-notes { font-size: 12px; color: var(--muted); margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--border); }
-  .hint { font-size: 12px; color: var(--muted); text-align: center; margin-top: 14px; }
-  .actions {
-    width: 100%;
-    max-width: 640px;
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 10px;
-    margin-top: 16px;
-  }
-  .action-btn {
-    padding: 14px;
-    border-radius: 10px;
-    border: 1px solid var(--border);
-    background: var(--panel);
-    color: var(--text);
-    font-size: 14px;
-    font-weight: 500;
-    cursor: pointer;
-    font-family: inherit;
-  }
-  .action-btn .kbd { font-size: 10px; color: var(--muted); display: block; margin-top: 4px; }
-  .action-btn.bad { color: var(--bad); border-color: rgba(248, 113, 113, 0.3); }
-  .action-btn.bad:hover { background: rgba(248, 113, 113, 0.08); }
-  .action-btn.hard { color: var(--hard); border-color: rgba(251, 191, 36, 0.3); }
-  .action-btn.hard:hover { background: rgba(251, 191, 36, 0.08); }
-  .action-btn.good { color: var(--good); border-color: rgba(74, 222, 128, 0.3); }
-  .action-btn.good:hover { background: rgba(74, 222, 128, 0.08); }
-  .hidden { display: none !important; }
-  .results {
-    width: 100%;
-    max-width: 640px;
-    background: var(--panel);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 28px;
-  }
-  .results h2 { margin: 0 0 16px 0; font-size: 22px; }
-  .stats-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-  }
-  .stat-card {
-    background: var(--panel-2);
-    border-radius: 10px;
-    padding: 14px;
+    max-width: 880px;
+    margin-bottom: 28px;
     text-align: center;
   }
-  .stat-num { font-size: 28px; font-weight: 700; }
-  .stat-num.good { color: var(--good); }
-  .stat-num.hard { color: var(--hard); }
-  .stat-num.bad { color: var(--bad); }
-  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
-  .json-box {
+  header h1 { font-size: 28px; margin: 0 0 8px 0; font-weight: 700; }
+  header p { color: var(--muted); margin: 0; font-size: 14px; }
+  .stats-bar {
     width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-    font-family: ui-monospace, "SF Mono", Menlo, monospace;
-    font-size: 11px;
-    color: var(--muted);
-    max-height: 200px;
-    overflow: auto;
-    margin: 12px 0;
+    max-width: 880px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 28px;
   }
-  .end-actions { display: flex; gap: 10px; flex-wrap: wrap; }
-  .footer { color: var(--muted); font-size: 11px; margin-top: 24px; }
+  .stat-pill {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    text-align: center;
+  }
+  .stat-pill .num { font-size: 22px; font-weight: 700; color: var(--accent); }
+  .stat-pill .num.good { color: var(--good); }
+  .stat-pill .label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+  .grid {
+    width: 100%;
+    max-width: 880px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 24px;
+    text-decoration: none;
+    color: var(--text);
+    transition: all 0.15s;
+    display: flex;
+    flex-direction: column;
+    min-height: 200px;
+  }
+  .card:hover { border-color: var(--accent); transform: translateY(-2px); background: var(--panel-2); }
+  .card.disabled { opacity: 0.5; pointer-events: none; }
+  .card-emoji { font-size: 36px; margin-bottom: 12px; }
+  .card-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+  .card-desc { font-size: 13px; color: var(--muted); line-height: 1.5; flex-grow: 1; }
+  .card-meta {
+    margin-top: 14px;
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    background: var(--panel-2);
+    color: var(--muted);
+    border-radius: 6px;
+    padding: 3px 8px;
+    font-size: 11px;
+  }
+  .tag.coming { background: rgba(251, 191, 36, 0.15); color: var(--hard); }
+  .tag.new { background: rgba(74, 222, 128, 0.15); color: var(--good); }
+  .links {
+    width: 100%;
+    max-width: 880px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    color: var(--muted);
+    font-size: 12px;
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .links a { color: var(--accent); text-decoration: none; }
+  .links a:hover { text-decoration: underline; }
 </style>
 </head>
 <body>
 
 <header>
-  <h1>📖 Learning English · Flashcards</h1>
-  <div class="controls">
-    <select id="mode">
-      <option value="es2en">ES → EN</option>
-      <option value="en2es">EN → ES</option>
-    </select>
-    <button class="btn" id="restart-btn">↻ Reset</button>
-  </div>
+  <h1>📚 Learning English</h1>
+  <p>Ejercicios para aprender vocabulario en contexto · Resultados sincronizan con tu DB en Notion</p>
 </header>
 
-<div class="progress-wrap"><div class="progress-bar" id="bar"></div></div>
-<div class="meta">
-  <span id="counter">0 / 0</span>
-  <span id="session-stats">✅ 0 · 🟡 0 · ❌ 0</span>
+<div class="stats-bar">
+  <div class="stat-pill"><div class="num" id="total-words">0</div><div class="label">Palabras</div></div>
+  <div class="stat-pill"><div class="num" id="total-cats">0</div><div class="label">Categorías</div></div>
+  <div class="stat-pill"><div class="num" id="total-levels">0</div><div class="label">Niveles CEFR</div></div>
+  <div class="stat-pill"><div class="num good" id="last-session">—</div><div class="label">Última sesión</div></div>
 </div>
 
-<div id="study-view">
-  <div class="card" id="card">
-    <div id="front">
-      <span class="pill cefr" id="pill-cefr"></span>
-      <span class="pill" id="pill-cat"></span>
-      <div class="front-prompt" id="front-prompt"></div>
-      <div class="front-text" id="front-text"></div>
+<div class="grid">
+  <a class="card" href="flashcards.html">
+    <div class="card-emoji">🃏</div>
+    <div class="card-title">Flashcards</div>
+    <div class="card-desc">Cartas para fijar el significado: ves la traducción y recordás la palabra (o al revés). Ideal para recall básico.</div>
+    <div class="card-meta">
+      <span class="tag">Recall</span>
+      <span class="tag">5-10 min</span>
     </div>
-    <div id="back" class="hidden">
-      <span class="pill cefr" id="back-pill-cefr"></span>
-      <span class="pill" id="back-pill-cat"></span>
-      <div class="back-word" id="back-word"></div>
-      <div class="back-pos" id="back-pos"></div>
-      <div class="back-meaning" id="back-meaning"></div>
-      <div class="back-example" id="back-example"></div>
-      <div class="back-notes" id="back-notes"></div>
+  </a>
+
+  <a class="card" href="matching.html">
+    <div class="card-emoji">🔗</div>
+    <div class="card-title">Matching</div>
+    <div class="card-desc">Emparejá la palabra en inglés con su traducción o definición. Por rondas de 5-8 pares.</div>
+    <div class="card-meta">
+      <span class="tag new">Nuevo</span>
+      <span class="tag">Recall + recognition</span>
+      <span class="tag">3-5 min</span>
     </div>
-    <div class="hint" id="hint">Click the card (or press Space) to reveal</div>
-  </div>
+  </a>
 
-  <div class="actions hidden" id="actions">
-    <button class="action-btn bad" data-rating="wrong">❌ Didn't know<span class="kbd">1</span></button>
-    <button class="action-btn hard" data-rating="hard">🟡 Hard<span class="kbd">2</span></button>
-    <button class="action-btn good" data-rating="good">✅ Knew it<span class="kbd">3</span></button>
-  </div>
+  <a class="card" href="speed.html">
+    <div class="card-emoji">⚡</div>
+    <div class="card-title">Speed Round</div>
+    <div class="card-desc">Cronómetro de 30/60/120 seg. Cuántas podés responder correcto. Multiple choice rápido.</div>
+    <div class="card-meta">
+      <span class="tag new">Nuevo</span>
+      <span class="tag">Gamificado</span>
+      <span class="tag">1-2 min</span>
+    </div>
+  </a>
+
+  <a class="card disabled" href="#">
+    <div class="card-emoji">✍️</div>
+    <div class="card-title">Fill in the blanks</div>
+    <div class="card-desc">Oración temática con un hueco. Elegís o escribís la palabra del banco que encaja.</div>
+    <div class="card-meta">
+      <span class="tag coming">Próximo</span>
+      <span class="tag">Uso activo</span>
+    </div>
+  </a>
+
+  <a class="card disabled" href="#">
+    <div class="card-emoji">📖</div>
+    <div class="card-title">Mini-story + comprehension</div>
+    <div class="card-desc">Historia corta usando 8-10 palabras mezcladas con un topic (Japón, trabajo, etc.) + preguntas.</div>
+    <div class="card-meta">
+      <span class="tag coming">Próximo</span>
+      <span class="tag">Contexto profundo</span>
+    </div>
+  </a>
+
+  <a class="card disabled" href="#">
+    <div class="card-emoji">🎧</div>
+    <div class="card-title">Listen & spell</div>
+    <div class="card-desc">El navegador dice la palabra (TTS), vos la escribís. Para fijar pronunciación + ortografía.</div>
+    <div class="card-meta">
+      <span class="tag coming">Próximo</span>
+      <span class="tag">Audio</span>
+    </div>
+  </a>
 </div>
 
-<div id="results-view" class="results hidden">
-  <h2>🎉 Session complete</h2>
-  <div class="stats-grid">
-    <div class="stat-card"><div class="stat-num good" id="s-good">0</div><div class="stat-label">Knew it</div></div>
-    <div class="stat-card"><div class="stat-num hard" id="s-hard">0</div><div class="stat-label">Hard</div></div>
-    <div class="stat-card"><div class="stat-num bad" id="s-bad">0</div><div class="stat-label">Didn't know</div></div>
-  </div>
-  <div style="font-size: 13px; color: var(--muted); margin-bottom: 8px;">Copia este JSON y pégalo en el chat para que Claude actualice tu nivel en Notion:</div>
-  <div class="json-box" id="json-box"></div>
-  <div class="end-actions">
-    <button class="btn" id="copy-btn">📋 Copy JSON</button>
-    <button class="btn" id="download-btn">💾 Download JSON</button>
-    <button class="btn" id="again-btn">🔄 Practice again</button>
-  </div>
+<div class="links">
+  <a href="https://www.notion.so/f4e6d1d7eac648378627384fac180049" target="_blank">📒 Vocabulary DB (Notion)</a>
+  <a href="https://github.com/Santiago8659/learning-english-flashcards" target="_blank">📦 GitHub repo</a>
 </div>
 
-<div class="footer">Keyboard: Space = flip · 1 = wrong · 2 = hard · 3 = good</div>
-
+<script src="vocab.js"></script>
 <script>
-const VOCAB = [
-  {"id":"35eacf43-d4c9-81b2-a76f-e79ea8a4b8a1","word":"even though","pos":"conjunction","cefr":"B1","category":"Conectores y enlaces","meaning":"used to say that something happened, even when there was a reason for it not to happen","es":"aunque, a pesar de que","example":"Even though it was raining, we went out.","notes":"although, though · ⚠️ no es 'even when' (=incluso cuando)"},
-  {"id":"35eacf43-d4c9-819b-aab5-cb2c81b0fb08","word":"therefore","pos":"adverb","cefr":"B2","category":"Conectores y enlaces","meaning":"for that reason; we use it to show the result of something","es":"por lo tanto, en consecuencia","example":"He didn't study; therefore, he failed.","notes":"thus, hence, consequently"},
-  {"id":"35eacf43-d4c9-815b-97af-f85c2d1e92da","word":"despite","pos":"preposition","cefr":"B2","category":"Conectores y enlaces","meaning":"we use this when something does not stop another thing from happening","es":"a pesar de","example":"Despite the rain, we went out.","notes":"in spite of · va con sustantivo o -ing"},
-  {"id":"35eacf43-d4c9-8177-8003-da9cb6fc1106","word":"regarding","pos":"preposition","cefr":"B2","category":"Conectores y enlaces","meaning":"about something; on the topic of something","es":"respecto a, en cuanto a","example":"I'm writing regarding your application.","notes":"concerning, with respect to, as for"},
-  {"id":"35eacf43-d4c9-81b6-b0c7-ff1f3c6621c4","word":"have to do with","pos":"phrase","cefr":"B2","category":"Conectores y enlaces","meaning":"to be about something, or to be connected to it","es":"tener que ver con","example":"This problem has to do with the new policy.","notes":"be related to, be connected with"},
-  {"id":"35eacf43-d4c9-81f0-a26f-ca89783e5882","word":"kind face","pos":"noun phrase","cefr":"B1","category":"Personas y descripciones","meaning":"a face that looks soft and friendly, like someone you can trust","es":"rostro amable","example":"She has a kind face you can trust.","notes":"friendly face, gentle look"},
-  {"id":"35eacf43-d4c9-816c-8fb3-dfd09ca6a78b","word":"appealing","pos":"adjective","cefr":"B2","category":"Personas y descripciones","meaning":"something you like and want, because it looks nice or sounds good","es":"atractivo, llamativo","example":"The offer sounds appealing.","notes":"attractive, tempting · ⚠️ 'conmovedor' sería moving/touching"},
-  {"id":"35eacf43-d4c9-814e-b525-d3a1be36b68f","word":"at ease","pos":"phrase","cefr":"B2","category":"Personas y descripciones","meaning":"calm and not worried; feeling safe and natural in a place or with people","es":"relajado, a gusto","example":"He felt at ease with the new team.","notes":"comfortable, relaxed ↔ uneasy"},
-  {"id":"35eacf43-d4c9-81f3-864e-f2196d0de6ea","word":"manners","pos":"noun","cefr":"B1","category":"Personas y descripciones","meaning":"the way you act with other people, like saying 'please' and 'thank you'","es":"modales","example":"Mind your manners at the table.","notes":"etiquette · good/bad manners"},
-  {"id":"35eacf43-d4c9-81d4-aa32-cd7c004c1b12","word":"compliments","pos":"noun","cefr":"B1","category":"Personas y descripciones","meaning":"nice things you say about someone to make them feel good","es":"cumplidos, halagos","example":"She gave me lots of compliments.","notes":"praise, flattery · pay/give a compliment"},
-  {"id":"35eacf43-d4c9-810d-9b87-cd770d2470c6","word":"plenty of","pos":"quantifier","cefr":"A2","category":"Personas y descripciones","meaning":"more than enough; a lot of something","es":"muchos, de sobra","example":"We have plenty of time.","notes":"lots of, loads of"},
-  {"id":"35eacf43-d4c9-8137-8e26-d0fa53a7b76d","word":"of your own","pos":"phrase","cefr":"B1","category":"Personas y descripciones","meaning":"something that is only yours and not shared with anyone","es":"tuyo propio","example":"You should have a place of your own.","notes":"enfatiza posesión/independencia"},
-  {"id":"35eacf43-d4c9-81c1-85ae-fc1b3c7fb929","word":"of yours","pos":"phrase","cefr":"B1","category":"Personas y descripciones","meaning":"belonging to you (used when we already know what we are talking about)","es":"tuyo / de los tuyos","example":"A friend of yours called.","notes":"construcción: a/an + noun + of yours"},
-  {"id":"35eacf43-d4c9-8107-94c8-f16c5321041e","word":"dwarf","pos":"noun","cefr":"B2","category":"Personas y descripciones","meaning":"a very short person, or a small magical person in fairy tales","es":"enano","example":"The story features seven dwarfs.","notes":"midget (ofensivo) · pl. dwarfs/dwarves"},
-  {"id":"35eacf43-d4c9-81a5-be5f-dbae2011f6fc","word":"jaw","pos":"noun","cefr":"B1","category":"Cuerpo y sensaciones","meaning":"the bottom bone of your face that moves when you talk or eat","es":"mandíbula","example":"He broke his jaw in the fall.","notes":"drop one's jaw, clench the jaw"},
-  {"id":"35eacf43-d4c9-8165-bebe-ebcd528009da","word":"yawn","pos":"verb","cefr":"B1","category":"Cuerpo y sensaciones","meaning":"to open your mouth wide and breathe in when you are tired or bored","es":"bostezo, bostezar","example":"She couldn't stop yawning.","notes":"also fig.: 'a yawn' = something boring"},
-  {"id":"35eacf43-d4c9-8183-9ced-c69272a478af","word":"stretches","pos":"noun","cefr":"A2","category":"Cuerpo y sensaciones","meaning":"slow movements that make your body and muscles longer, so they feel better","es":"estiramientos","example":"Do some stretches before running.","notes":"stretch out, stretch one's legs"},
-  {"id":"35eacf43-d4c9-8164-887c-d469f756f783","word":"cramp","pos":"noun","cefr":"B1","category":"Cuerpo y sensaciones","meaning":"a sudden strong pain in a muscle that makes it hard to move","es":"calambre","example":"I got a cramp in my leg.","notes":"muscle cramp, stomach cramps"},
-  {"id":"35eacf43-d4c9-81ec-abfc-cd775b13b9d7","word":"hump","pos":"noun","cefr":"B2","category":"Cuerpo y sensaciones","meaning":"a round shape that sticks up, like on a camel's back","es":"joroba","example":"A camel has a hump.","notes":"hunchback (jorobado)"},
-  {"id":"35eacf43-d4c9-8150-9047-c264f93d416a","word":"pottery","pos":"noun","cefr":"B2","category":"Arte y cerámica","meaning":"cups, bowls and other things made from soft earth and baked until hard","es":"cerámica","example":"She makes beautiful pottery.","notes":"ceramics · a pottery class"},
-  {"id":"35eacf43-d4c9-81fd-88b7-ed7ae809e1d6","word":"clay","pos":"noun","cefr":"B1","category":"Arte y cerámica","meaning":"soft, wet earth that you can shape with your hands and let dry into hard objects","es":"barro, arcilla","example":"The bowl is made of clay.","notes":"clay pot, modeling clay"},
-  {"id":"35eacf43-d4c9-8163-9430-d2a4be862148","word":"brush strokes","pos":"noun","cefr":"B2","category":"Arte y cerámica","meaning":"the lines or marks that a paintbrush leaves on a picture","es":"pinceladas","example":"You can see the artist's brush strokes.","notes":"bold/delicate brush strokes"},
-  {"id":"35eacf43-d4c9-812f-a478-f2af9aa64361","word":"forgery","pos":"noun","cefr":"C1","category":"Arte y cerámica","meaning":"a fake copy of something (a painting, document, money) made to trick people","es":"falsificación","example":"The painting turned out to be a forgery.","notes":"fake, counterfeit, fraud"},
-  {"id":"35eacf43-d4c9-8149-a735-f11d8ab8c636","word":"wag","pos":"verb","cefr":"B1","category":"Verbos y acciones","meaning":"to move something quickly from one side to the other, like a dog's tail when it is happy","es":"menear, agitar (la cola)","example":"The dog wagged its tail.","notes":"shake · típico: a dog wags its tail"},
-  {"id":"35eacf43-d4c9-8150-84cd-f6d3a1681ec8","word":"dig","pos":"verb","cefr":"A2","category":"Verbos y acciones","meaning":"to use your hands or a tool to make a hole in the ground","es":"escarbar, cavar","example":"They dug a hole in the garden.","notes":"irreg.: dig / dug / dug"},
-  {"id":"35eacf43-d4c9-8178-ad07-cb609fbc697c","word":"argue","pos":"verb","cefr":"A2","category":"Verbos y acciones","meaning":"to talk in a loud or angry way because you do not agree with someone","es":"discutir, pelear","example":"They always argue about money.","notes":"quarrel, fight · argue with sb about sth"},
-  {"id":"35eacf43-d4c9-8141-bb7d-fd8ebc78ec32","word":"figure out","pos":"phrasal verb","cefr":"B1","category":"Verbos y acciones","meaning":"to think hard until you understand something or find the answer","es":"averiguar, darse cuenta","example":"I can't figure out this puzzle.","notes":"work out, understand"},
-  {"id":"35eacf43-d4c9-8140-8fb7-edb33b6ed32d","word":"strike","pos":"verb","cefr":"B2","category":"Verbos y acciones","meaning":"to give you a strong feeling or idea about something or someone","es":"llamar la atención, parecer","example":"It strikes me as strange.","notes":"it strikes me that..."},
-  {"id":"35eacf43-d4c9-8101-8f74-e63a81bfb387","word":"appear to","pos":"phrasal verb","cefr":"B1","category":"Verbos y acciones","meaning":"to look like or give the feeling of being something (without us being 100% sure)","es":"parecer, dar la impresión de","example":"He appears to be honest.","notes":"seem to · ⚠️ no es 'comportarse' (eso es behave)"},
-  {"id":"35eacf43-d4c9-81bf-95e6-cc38db8b312c","word":"be positive","pos":"phrase","cefr":"B1","category":"Verbos y acciones","meaning":"to be 100% sure about something","es":"estar seguro/a","example":"I'm positive I locked the door.","notes":"be certain, be sure"},
-  {"id":"35eacf43-d4c9-81c8-90cd-faa94bf3cecc","word":"have a hunch","pos":"phrase","cefr":"B2","category":"Verbos y acciones","meaning":"to feel that something is true, even when you have no proof","es":"tener una corazonada, sospechar","example":"I have a hunch he'll call today.","notes":"gut feeling, intuition"},
-  {"id":"35eacf43-d4c9-8180-8570-ff4f46ae8eaa","word":"be sorry","pos":"phrase","cefr":"A1","category":"Emociones y reacciones","meaning":"to feel bad about something you did, or about something sad that happened","es":"lamentarlo, sentirlo","example":"I'm sorry for being late.","notes":"apologize · I'm sorry about/for"},
-  {"id":"35eacf43-d4c9-81e2-b7cc-f758df334b99","word":"don't mind","pos":"phrase","cefr":"A2","category":"Emociones y reacciones","meaning":"to be okay with something; it is not a problem for you","es":"no me molesta, me da igual","example":"I don't mind waiting.","notes":"mind + -ing"},
-  {"id":"35eacf43-d4c9-8172-a2a7-e96d678677a3","word":"clues","pos":"noun","cefr":"B1","category":"Emociones y reacciones","meaning":"small pieces of information that help you find the answer to a mystery or problem","es":"pistas","example":"The detective found new clues.","notes":"hints, leads · give/drop a clue"},
-  {"id":"35eacf43-d4c9-8153-b9ff-c1ea5388b466","word":"crap","pos":"interjection","cefr":"B2","category":"Expresiones informales","meaning":"a rude word for something bad or useless; or a quick way to show you are upset","es":"mierda, porquería","example":"Oh crap, I forgot my keys!","notes":"shit (más fuerte), rubbish (más suave) · evitar en contexto formal"}
-];
+  document.getElementById('total-words').textContent = window.VOCAB.length;
+  document.getElementById('total-cats').textContent = new Set(window.VOCAB.map(v => v.category)).size;
+  document.getElementById('total-levels').textContent = new Set(window.VOCAB.map(v => v.cefr)).size;
 
-const STORAGE_KEY = 'learning_english_results_v1';
-
-let state = {
-  mode: 'es2en',
-  deck: [],
-  index: 0,
-  flipped: false,
-  results: {},
-  sessionStart: null,
-};
-
-const $ = (id) => document.getElementById(id);
-
-function shuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [a[i], a[j]] = [a[j], a[i]];
+  const lastResults = localStorage.getItem('learning_english_results_v1');
+  if (lastResults) {
+    try {
+      const data = JSON.parse(lastResults);
+      if (data.last_session && data.last_session.results) {
+        const goodCount = Object.values(data.last_session.results).filter(r => r.rating === 'good').length;
+        const total = Object.keys(data.last_session.results).length;
+        document.getElementById('last-session').textContent = `${goodCount}/${total}`;
+      }
+    } catch {}
   }
-  return a;
-}
-
-function startSession() {
-  state.deck = shuffle(VOCAB);
-  state.index = 0;
-  state.flipped = false;
-  state.results = {};
-  state.sessionStart = new Date().toISOString();
-  $('results-view').classList.add('hidden');
-  $('study-view').classList.remove('hidden');
-  renderCard();
-}
-
-function renderCard() {
-  const card = state.deck[state.index];
-  if (!card) return showResults();
-
-  $('counter').textContent = `${state.index + 1} / ${state.deck.length}`;
-  $('bar').style.width = `${(state.index / state.deck.length) * 100}%`;
-  updateSessionStats();
-
-  $('pill-cefr').textContent = card.cefr;
-  $('pill-cat').textContent = card.category;
-  $('back-pill-cefr').textContent = card.cefr;
-  $('back-pill-cat').textContent = card.category;
-
-  if (state.mode === 'es2en') {
-    $('front-prompt').textContent = '¿Cómo se dice en inglés?';
-    $('front-text').textContent = card.es;
-  } else {
-    $('front-prompt').textContent = 'What does this mean?';
-    $('front-text').textContent = card.word;
-  }
-
-  $('back-word').textContent = card.word;
-  $('back-pos').textContent = card.pos;
-  $('back-meaning').textContent = card.meaning;
-  $('back-example').textContent = card.example;
-  $('back-notes').textContent = card.notes;
-
-  $('front').classList.remove('hidden');
-  $('back').classList.add('hidden');
-  $('actions').classList.add('hidden');
-  $('hint').classList.remove('hidden');
-  state.flipped = false;
-}
-
-function flipCard() {
-  if (state.flipped) return;
-  state.flipped = true;
-  $('front').classList.add('hidden');
-  $('back').classList.remove('hidden');
-  $('actions').classList.remove('hidden');
-  $('hint').classList.add('hidden');
-}
-
-function rate(rating) {
-  if (!state.flipped) return;
-  const card = state.deck[state.index];
-  state.results[card.id] = {
-    word: card.word,
-    rating: rating,
-    at: new Date().toISOString(),
-  };
-  saveProgress();
-  state.index++;
-  if (state.index >= state.deck.length) {
-    showResults();
-  } else {
-    renderCard();
-  }
-}
-
-function updateSessionStats() {
-  const counts = { good: 0, hard: 0, wrong: 0 };
-  Object.values(state.results).forEach((r) => counts[r.rating]++);
-  $('session-stats').textContent = `✅ ${counts.good} · 🟡 ${counts.hard} · ❌ ${counts.wrong}`;
-}
-
-function showResults() {
-  $('study-view').classList.add('hidden');
-  $('results-view').classList.remove('hidden');
-  $('bar').style.width = '100%';
-
-  const counts = { good: 0, hard: 0, wrong: 0 };
-  Object.values(state.results).forEach((r) => counts[r.rating]++);
-  $('s-good').textContent = counts.good;
-  $('s-hard').textContent = counts.hard;
-  $('s-bad').textContent = counts.wrong;
-
-  const payload = {
-    session_start: state.sessionStart,
-    session_end: new Date().toISOString(),
-    mode: state.mode,
-    total: Object.keys(state.results).length,
-    summary: counts,
-    results: Object.entries(state.results).map(([id, r]) => ({
-      notion_id: id,
-      word: r.word,
-      rating: r.rating,
-    })),
-  };
-  $('json-box').textContent = JSON.stringify(payload, null, 2);
-  window._lastPayload = payload;
-}
-
-function saveProgress() {
-  const all = JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
-  all.last_session = {
-    started: state.sessionStart,
-    mode: state.mode,
-    results: state.results,
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(all));
-}
-
-document.addEventListener('click', (e) => {
-  const card = e.target.closest('#card');
-  if (card && !state.flipped) flipCard();
-
-  const action = e.target.closest('[data-rating]');
-  if (action) rate(action.dataset.rating);
-});
-
-document.addEventListener('keydown', (e) => {
-  if (e.code === 'Space') {
-    e.preventDefault();
-    if (!state.flipped) flipCard();
-  } else if (state.flipped) {
-    if (e.key === '1') rate('wrong');
-    else if (e.key === '2') rate('hard');
-    else if (e.key === '3') rate('good');
-  }
-});
-
-$('mode').addEventListener('change', (e) => {
-  state.mode = e.target.value;
-  startSession();
-});
-
-$('restart-btn').addEventListener('click', startSession);
-$('again-btn').addEventListener('click', startSession);
-
-$('copy-btn').addEventListener('click', async () => {
-  try {
-    await navigator.clipboard.writeText(JSON.stringify(window._lastPayload, null, 2));
-    $('copy-btn').textContent = '✓ Copied!';
-    setTimeout(() => ($('copy-btn').textContent = '📋 Copy JSON'), 1500);
-  } catch (err) {
-    alert('Copy failed. Select the JSON text manually.');
-  }
-});
-
-$('download-btn').addEventListener('click', () => {
-  const blob = new Blob([JSON.stringify(window._lastPayload, null, 2)], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `flashcards_results_${new Date().toISOString().slice(0, 10)}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-});
-
-startSession();
 </script>
 </body>
 </html>

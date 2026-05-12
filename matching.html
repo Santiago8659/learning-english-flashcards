@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning English · Matching</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #1a1d24;
+    --panel-2: #232730;
+    --text: #e8eaf0;
+    --muted: #8a91a0;
+    --accent: #6aa6ff;
+    --good: #4ade80;
+    --hard: #fbbf24;
+    --bad: #f87171;
+    --border: #2a2f3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  header {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  .back-link { color: var(--muted); text-decoration: none; font-size: 13px; }
+  .back-link:hover { color: var(--text); }
+  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  select, .btn {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--panel-2); }
+  .progress-wrap {
+    width: 100%;
+    max-width: 720px;
+    background: var(--panel);
+    height: 6px;
+    border-radius: 4px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+  .meta {
+    width: 100%;
+    max-width: 720px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+  .grid {
+    width: 100%;
+    max-width: 720px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .col-title {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+    text-align: center;
+  }
+  .col { display: flex; flex-direction: column; gap: 10px; }
+  .tile {
+    background: var(--panel);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 15px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.15s;
+    color: var(--text);
+    font-family: inherit;
+    min-height: 56px;
+    display: flex;
+    align-items: center;
+  }
+  .tile:hover:not(.matched):not(.locked) { background: var(--panel-2); border-color: #3a4050; }
+  .tile.selected { border-color: var(--accent); background: rgba(106, 166, 255, 0.08); }
+  .tile.matched { border-color: var(--good); background: rgba(74, 222, 128, 0.08); color: var(--good); cursor: default; }
+  .tile.wrong-flash { border-color: var(--bad); background: rgba(248, 113, 113, 0.12); animation: shake 0.3s; }
+  .tile.left { font-weight: 600; color: var(--accent); }
+  .tile.matched.left { color: var(--good); }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    25% { transform: translateX(-4px); }
+    75% { transform: translateX(4px); }
+  }
+  .results {
+    width: 100%;
+    max-width: 720px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+  }
+  .results h2 { margin: 0 0 16px 0; font-size: 22px; }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .stat-card { background: var(--panel-2); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 700; }
+  .stat-num.good { color: var(--good); }
+  .stat-num.hard { color: var(--hard); }
+  .stat-num.bad { color: var(--bad); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .json-box {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    color: var(--muted);
+    max-height: 200px;
+    overflow: auto;
+    margin: 12px 0;
+  }
+  .end-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hidden { display: none !important; }
+  .footer { color: var(--muted); font-size: 11px; margin-top: 24px; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <a href="index.html" class="back-link">← Hub</a>
+    <h1 style="display:inline-block; margin-left:12px;">🔗 Matching</h1>
+  </div>
+  <div class="controls">
+    <select id="mode">
+      <option value="es">EN ↔ ES (traducción)</option>
+      <option value="meaning">EN ↔ Easy EN (definición)</option>
+    </select>
+    <select id="pairs">
+      <option value="5">5 pares</option>
+      <option value="6" selected>6 pares</option>
+      <option value="8">8 pares</option>
+    </select>
+    <button class="btn" id="restart-btn">↻ Reset</button>
+  </div>
+</header>
+
+<div class="progress-wrap"><div class="progress-bar" id="bar"></div></div>
+<div class="meta">
+  <span id="counter">Round 0 / 0</span>
+  <span id="session-stats">✓ 0 · ✗ 0</span>
+</div>
+
+<div id="study-view">
+  <div class="grid">
+    <div>
+      <div class="col-title">English</div>
+      <div class="col" id="col-left"></div>
+    </div>
+    <div>
+      <div class="col-title" id="right-title">Español</div>
+      <div class="col" id="col-right"></div>
+    </div>
+  </div>
+</div>
+
+<div id="results-view" class="results hidden">
+  <h2>🎉 Matching complete</h2>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num good" id="s-perfect">0</div><div class="stat-label">First try</div></div>
+    <div class="stat-card"><div class="stat-num hard" id="s-retry">0</div><div class="stat-label">Needed retry</div></div>
+    <div class="stat-card"><div class="stat-num bad" id="s-misses">0</div><div class="stat-label">Wrong attempts</div></div>
+  </div>
+  <div style="font-size: 13px; color: var(--muted); margin-bottom: 8px;">Copia el JSON y pégalo en el chat para actualizar tu progreso en Notion:</div>
+  <div class="json-box" id="json-box"></div>
+  <div class="end-actions">
+    <button class="btn" id="copy-btn">📋 Copy JSON</button>
+    <button class="btn" id="download-btn">💾 Download JSON</button>
+    <button class="btn" id="again-btn">🔄 Practice again</button>
+  </div>
+</div>
+
+<div class="footer">Click una palabra a la izquierda, después su match a la derecha</div>
+
+<script src="vocab.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+
+let state = {
+  mode: 'es',
+  pairsPerRound: 6,
+  deck: [],
+  rounds: [],
+  currentRound: 0,
+  selectedLeft: null,
+  results: {},
+  sessionStart: null,
+};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function startSession() {
+  state.deck = shuffle(window.VOCAB);
+  state.rounds = [];
+  for (let i = 0; i < state.deck.length; i += state.pairsPerRound) {
+    state.rounds.push(state.deck.slice(i, i + state.pairsPerRound));
+  }
+  state.currentRound = 0;
+  state.results = {};
+  state.selectedLeft = null;
+  state.sessionStart = new Date().toISOString();
+  $('results-view').classList.add('hidden');
+  $('study-view').classList.remove('hidden');
+  $('right-title').textContent = state.mode === 'es' ? 'Español' : 'Easy English meaning';
+  renderRound();
+}
+
+function renderRound() {
+  if (state.currentRound >= state.rounds.length) return showResults();
+  const cards = state.rounds[state.currentRound];
+  const leftCol = $('col-left');
+  const rightCol = $('col-right');
+  leftCol.innerHTML = '';
+  rightCol.innerHTML = '';
+
+  cards.forEach((c) => {
+    const left = document.createElement('button');
+    left.className = 'tile left';
+    left.textContent = c.word;
+    left.dataset.id = c.id;
+    left.dataset.side = 'left';
+    leftCol.appendChild(left);
+  });
+
+  shuffle(cards).forEach((c) => {
+    const right = document.createElement('button');
+    right.className = 'tile right';
+    right.textContent = state.mode === 'es' ? c.es : c.meaning;
+    right.dataset.id = c.id;
+    right.dataset.side = 'right';
+    rightCol.appendChild(right);
+  });
+
+  state.selectedLeft = null;
+  updateProgress();
+}
+
+function onTileClick(e) {
+  const tile = e.target.closest('.tile');
+  if (!tile || tile.classList.contains('matched')) return;
+  const side = tile.dataset.side;
+  const id = tile.dataset.id;
+
+  if (side === 'left') {
+    document.querySelectorAll('.tile.left.selected').forEach((t) => t.classList.remove('selected'));
+    tile.classList.add('selected');
+    state.selectedLeft = tile;
+  } else {
+    if (!state.selectedLeft) return;
+    const leftId = state.selectedLeft.dataset.id;
+    if (!state.results[leftId]) state.results[leftId] = { word: tileText(leftId, 'left'), attempts: 0, firstTry: false };
+    state.results[leftId].attempts++;
+
+    if (leftId === id) {
+      state.selectedLeft.classList.remove('selected');
+      state.selectedLeft.classList.add('matched');
+      tile.classList.add('matched');
+      if (state.results[leftId].attempts === 1) state.results[leftId].firstTry = true;
+      state.selectedLeft = null;
+      updateProgress();
+      if (allMatched()) setTimeout(nextRound, 700);
+    } else {
+      tile.classList.add('wrong-flash');
+      state.selectedLeft.classList.add('wrong-flash');
+      const sel = state.selectedLeft;
+      setTimeout(() => {
+        tile.classList.remove('wrong-flash');
+        sel.classList.remove('wrong-flash', 'selected');
+        state.selectedLeft = null;
+        updateProgress();
+      }, 400);
+    }
+  }
+}
+
+function tileText(id, side) {
+  const tile = document.querySelector(`.tile.${side}[data-id="${id}"]`);
+  return tile ? tile.textContent : '';
+}
+
+function allMatched() {
+  return document.querySelectorAll('#study-view .tile.matched').length ===
+         document.querySelectorAll('#study-view .tile').length;
+}
+
+function nextRound() {
+  state.currentRound++;
+  if (state.currentRound >= state.rounds.length) {
+    showResults();
+  } else {
+    renderRound();
+  }
+}
+
+function updateProgress() {
+  const totalPairs = state.deck.length;
+  const matched = Object.values(state.results).filter((r) => r.firstTry || r.attempts > 0 && document.querySelector(`.tile.left[data-id="${getIdFromResult(r)}"]`)?.classList.contains('matched')).length;
+  const completedRounds = state.currentRound;
+  const completedPairs = completedRounds * state.pairsPerRound + (document.querySelectorAll('#study-view .tile.matched.left').length);
+
+  $('counter').textContent = `Round ${state.currentRound + 1} / ${state.rounds.length}`;
+  $('bar').style.width = `${(completedPairs / totalPairs) * 100}%`;
+
+  const first = Object.values(state.results).filter((r) => r.firstTry).length;
+  const retry = Object.values(state.results).filter((r) => !r.firstTry && r.attempts > 0).length;
+  const misses = Object.values(state.results).reduce((sum, r) => sum + Math.max(0, r.attempts - 1), 0);
+  $('session-stats').textContent = `✓ ${first} · 🟡 ${retry} · ✗ ${misses} wrong tries`;
+}
+
+function getIdFromResult(r) {
+  return Object.entries(state.results).find(([, v]) => v === r)?.[0];
+}
+
+function showResults() {
+  $('study-view').classList.add('hidden');
+  $('results-view').classList.remove('hidden');
+  $('bar').style.width = '100%';
+
+  const first = Object.values(state.results).filter((r) => r.firstTry).length;
+  const retry = Object.values(state.results).filter((r) => !r.firstTry && r.attempts > 0).length;
+  const misses = Object.values(state.results).reduce((sum, r) => sum + Math.max(0, r.attempts - 1), 0);
+
+  $('s-perfect').textContent = first;
+  $('s-retry').textContent = retry;
+  $('s-misses').textContent = misses;
+
+  const payload = {
+    exercise: 'matching',
+    session_start: state.sessionStart,
+    session_end: new Date().toISOString(),
+    mode: state.mode,
+    total: Object.keys(state.results).length,
+    summary: { first_try: first, needed_retry: retry, total_wrong_attempts: misses },
+    results: Object.entries(state.results).map(([id, r]) => ({
+      notion_id: id,
+      word: r.word,
+      attempts: r.attempts,
+      first_try: r.firstTry,
+      rating: r.firstTry ? 'good' : r.attempts <= 2 ? 'hard' : 'wrong',
+    })),
+  };
+  $('json-box').textContent = JSON.stringify(payload, null, 2);
+  window._lastPayload = payload;
+}
+
+document.addEventListener('click', onTileClick);
+
+$('mode').addEventListener('change', (e) => {
+  state.mode = e.target.value;
+  startSession();
+});
+$('pairs').addEventListener('change', (e) => {
+  state.pairsPerRound = parseInt(e.target.value, 10);
+  startSession();
+});
+$('restart-btn').addEventListener('click', startSession);
+$('again-btn').addEventListener('click', startSession);
+
+$('copy-btn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(window._lastPayload, null, 2));
+    $('copy-btn').textContent = '✓ Copied!';
+    setTimeout(() => ($('copy-btn').textContent = '📋 Copy JSON'), 1500);
+  } catch (err) {
+    alert('Copy failed. Select the JSON text manually.');
+  }
+});
+
+$('download-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(window._lastPayload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `matching_results_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+startSession();
+</script>
+</body>
+</html>

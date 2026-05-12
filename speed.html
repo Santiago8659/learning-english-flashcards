@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning English · Speed Round</title>
+<style>
+  :root {
+    --bg: #0f1115;
+    --panel: #1a1d24;
+    --panel-2: #232730;
+    --text: #e8eaf0;
+    --muted: #8a91a0;
+    --accent: #6aa6ff;
+    --good: #4ade80;
+    --hard: #fbbf24;
+    --bad: #f87171;
+    --border: #2a2f3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px;
+  }
+  header {
+    width: 100%;
+    max-width: 640px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  .back-link { color: var(--muted); text-decoration: none; font-size: 13px; }
+  .back-link:hover { color: var(--text); }
+  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  select, .btn {
+    background: var(--panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .btn:hover { background: var(--panel-2); }
+  .topbar {
+    width: 100%;
+    max-width: 640px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+  .stat-tile {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-tile .label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; }
+  .stat-tile .value { font-size: 28px; font-weight: 700; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .stat-tile.timer.warning .value { color: var(--hard); }
+  .stat-tile.timer.danger .value { color: var(--bad); animation: pulse 0.5s infinite; }
+  .stat-tile.score .value { color: var(--accent); }
+  @keyframes pulse { 50% { opacity: 0.5; } }
+
+  .card {
+    width: 100%;
+    max-width: 640px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    margin-bottom: 16px;
+  }
+  .prompt-label {
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+  .prompt-word {
+    font-size: 36px;
+    font-weight: 700;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .prompt-pos { font-size: 13px; color: var(--muted); }
+
+  .options {
+    width: 100%;
+    max-width: 640px;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+  .option-btn {
+    background: var(--panel);
+    color: var(--text);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    padding: 16px;
+    font-size: 15px;
+    cursor: pointer;
+    font-family: inherit;
+    text-align: left;
+    transition: all 0.1s;
+    min-height: 70px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .option-btn:hover { background: var(--panel-2); border-color: #3a4050; }
+  .option-btn .num {
+    width: 22px;
+    height: 22px;
+    border-radius: 5px;
+    background: var(--panel-2);
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    flex-shrink: 0;
+  }
+  .option-btn.correct { border-color: var(--good); background: rgba(74, 222, 128, 0.12); color: var(--good); }
+  .option-btn.wrong { border-color: var(--bad); background: rgba(248, 113, 113, 0.12); color: var(--bad); }
+
+  #start-view, #results-view {
+    width: 100%;
+    max-width: 640px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+    text-align: center;
+  }
+  #start-view h2 { margin: 0 0 8px 0; }
+  #start-view p { color: var(--muted); margin: 8px 0 24px 0; }
+  .big-btn {
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    border-radius: 10px;
+    padding: 14px 32px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .big-btn:hover { opacity: 0.9; }
+
+  .results-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 20px 0;
+  }
+  .res-stat { background: var(--panel-2); border-radius: 10px; padding: 14px; }
+  .res-stat .v { font-size: 28px; font-weight: 700; }
+  .res-stat .v.good { color: var(--good); }
+  .res-stat .v.bad { color: var(--bad); }
+  .res-stat .v.accent { color: var(--accent); }
+  .res-stat .l { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .miss-list {
+    text-align: left;
+    background: var(--panel-2);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 12px 0;
+    font-size: 13px;
+    max-height: 180px;
+    overflow: auto;
+  }
+  .miss-list .row { padding: 6px 0; border-bottom: 1px dashed var(--border); }
+  .miss-list .row:last-child { border: none; }
+  .miss-list .w { color: var(--accent); font-weight: 600; }
+  .miss-list .a { color: var(--muted); }
+  .miss-list .c { color: var(--good); }
+  .json-box {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 11px;
+    color: var(--muted);
+    max-height: 180px;
+    overflow: auto;
+    margin: 12px 0;
+    text-align: left;
+  }
+  .end-actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+  .hidden { display: none !important; }
+  .footer { color: var(--muted); font-size: 11px; margin-top: 24px; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <a href="index.html" class="back-link">← Hub</a>
+    <h1 style="display:inline-block; margin-left:12px;">⚡ Speed Round</h1>
+  </div>
+  <div class="controls">
+    <select id="duration">
+      <option value="30">30 segundos</option>
+      <option value="60" selected>60 segundos</option>
+      <option value="120">120 segundos</option>
+    </select>
+    <select id="mode">
+      <option value="en2es">EN → ES (¿qué significa?)</option>
+      <option value="es2en">ES → EN (¿cómo se dice?)</option>
+    </select>
+  </div>
+</header>
+
+<div id="start-view">
+  <h2>⚡ Speed Round</h2>
+  <p>Tenés <strong id="dur-label">60</strong> segundos. Cada respuesta correcta = +1 punto. Errar no resta, pero sumás un fallo.</p>
+  <button class="big-btn" id="start-btn">Start!</button>
+  <p style="font-size:11px;margin-top:18px;">Tip: usá las teclas <strong>1 / 2 / 3 / 4</strong> para responder rápido</p>
+</div>
+
+<div id="play-view" class="hidden">
+  <div class="topbar">
+    <div class="stat-tile timer" id="timer-tile">
+      <div class="label">Time</div>
+      <div class="value" id="timer-value">60s</div>
+    </div>
+    <div class="stat-tile score">
+      <div class="label">Score</div>
+      <div class="value" id="score-value">0</div>
+    </div>
+    <div class="stat-tile">
+      <div class="label">Streak</div>
+      <div class="value" id="streak-value">0</div>
+    </div>
+  </div>
+
+  <div class="card" id="prompt-card">
+    <div class="prompt-label" id="prompt-label">¿Qué significa?</div>
+    <div class="prompt-word" id="prompt-word"></div>
+    <div class="prompt-pos" id="prompt-pos"></div>
+  </div>
+
+  <div class="options" id="options"></div>
+</div>
+
+<div id="results-view" class="hidden">
+  <h2>🏁 Time's up!</h2>
+  <div class="results-grid">
+    <div class="res-stat"><div class="v accent" id="r-score">0</div><div class="l">Score</div></div>
+    <div class="res-stat"><div class="v good" id="r-correct">0</div><div class="l">Correct</div></div>
+    <div class="res-stat"><div class="v bad" id="r-wrong">0</div><div class="l">Wrong</div></div>
+  </div>
+  <div id="acc-line" style="color:var(--muted); font-size:13px; margin-bottom:12px;"></div>
+  <div id="miss-section" class="hidden">
+    <div style="font-size:12px; color:var(--muted); text-align:left; margin-bottom:6px;">Palabras falladas:</div>
+    <div class="miss-list" id="miss-list"></div>
+  </div>
+  <div style="font-size: 12px; color: var(--muted); margin: 14px 0 4px 0; text-align: left;">JSON para que Claude actualice tu progreso en Notion:</div>
+  <div class="json-box" id="json-box"></div>
+  <div class="end-actions">
+    <button class="btn" id="copy-btn">📋 Copy JSON</button>
+    <button class="btn" id="download-btn">💾 Download</button>
+    <button class="big-btn" id="again-btn">🔄 Play again</button>
+  </div>
+</div>
+
+<div class="footer">Cuanto más rápido respondés bien, mejor score · Errores no restan, pero rompen la racha</div>
+
+<script src="vocab.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+
+let state = {
+  duration: 60,
+  mode: 'en2es',
+  timeLeft: 60,
+  score: 0,
+  streak: 0,
+  bestStreak: 0,
+  currentCard: null,
+  correctAnswers: [],
+  wrongAnswers: [],
+  timerInterval: null,
+  sessionStart: null,
+  answered: false,
+};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function pickCard() {
+  state.currentCard = window.VOCAB[Math.floor(Math.random() * window.VOCAB.length)];
+  state.answered = false;
+  renderCard();
+}
+
+function renderCard() {
+  const c = state.currentCard;
+  if (state.mode === 'en2es') {
+    $('prompt-label').textContent = '¿Qué significa esta palabra?';
+    $('prompt-word').textContent = c.word;
+    $('prompt-pos').textContent = `${c.pos} · ${c.cefr}`;
+  } else {
+    $('prompt-label').textContent = '¿Cómo se dice en inglés?';
+    $('prompt-word').textContent = c.es;
+    $('prompt-pos').textContent = `${c.pos} · ${c.cefr}`;
+  }
+
+  const correctText = state.mode === 'en2es' ? c.es : c.word;
+  const distractorPool = window.VOCAB.filter((v) => v.id !== c.id);
+  const distractors = shuffle(distractorPool).slice(0, 3).map((v) => state.mode === 'en2es' ? v.es : v.word);
+  const options = shuffle([correctText, ...distractors]);
+
+  const opts = $('options');
+  opts.innerHTML = '';
+  options.forEach((text, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.dataset.text = text;
+    btn.innerHTML = `<span class="num">${idx + 1}</span> <span>${text}</span>`;
+    opts.appendChild(btn);
+  });
+}
+
+function answer(text) {
+  if (state.answered) return;
+  state.answered = true;
+  const c = state.currentCard;
+  const correctText = state.mode === 'en2es' ? c.es : c.word;
+  const correct = text === correctText;
+
+  document.querySelectorAll('.option-btn').forEach((btn) => {
+    if (btn.dataset.text === correctText) btn.classList.add('correct');
+    else if (btn.dataset.text === text && !correct) btn.classList.add('wrong');
+  });
+
+  if (correct) {
+    state.score++;
+    state.streak++;
+    if (state.streak > state.bestStreak) state.bestStreak = state.streak;
+    state.correctAnswers.push({ id: c.id, word: c.word });
+    $('score-value').textContent = state.score;
+    $('streak-value').textContent = state.streak;
+  } else {
+    state.streak = 0;
+    state.wrongAnswers.push({ id: c.id, word: c.word, chose: text, correct: correctText });
+    $('streak-value').textContent = '0';
+  }
+
+  setTimeout(() => {
+    if (state.timeLeft > 0) pickCard();
+  }, correct ? 250 : 800);
+}
+
+function startGame() {
+  state.timeLeft = state.duration;
+  state.score = 0;
+  state.streak = 0;
+  state.bestStreak = 0;
+  state.correctAnswers = [];
+  state.wrongAnswers = [];
+  state.sessionStart = new Date().toISOString();
+  $('score-value').textContent = '0';
+  $('streak-value').textContent = '0';
+  $('timer-value').textContent = `${state.timeLeft}s`;
+  $('timer-tile').classList.remove('warning', 'danger');
+
+  $('start-view').classList.add('hidden');
+  $('results-view').classList.add('hidden');
+  $('play-view').classList.remove('hidden');
+
+  pickCard();
+  if (state.timerInterval) clearInterval(state.timerInterval);
+  state.timerInterval = setInterval(tick, 1000);
+}
+
+function tick() {
+  state.timeLeft--;
+  $('timer-value').textContent = `${state.timeLeft}s`;
+  if (state.timeLeft <= 10) $('timer-tile').classList.add('danger');
+  else if (state.timeLeft <= 20) $('timer-tile').classList.add('warning');
+  if (state.timeLeft <= 0) endGame();
+}
+
+function endGame() {
+  clearInterval(state.timerInterval);
+  state.timerInterval = null;
+  $('play-view').classList.add('hidden');
+  $('results-view').classList.remove('hidden');
+
+  const total = state.correctAnswers.length + state.wrongAnswers.length;
+  const accuracy = total > 0 ? Math.round((state.correctAnswers.length / total) * 100) : 0;
+
+  $('r-score').textContent = state.score;
+  $('r-correct').textContent = state.correctAnswers.length;
+  $('r-wrong').textContent = state.wrongAnswers.length;
+  $('acc-line').textContent = `${total} preguntas respondidas · ${accuracy}% accuracy · best streak: ${state.bestStreak}`;
+
+  if (state.wrongAnswers.length) {
+    $('miss-section').classList.remove('hidden');
+    $('miss-list').innerHTML = state.wrongAnswers.map((w) =>
+      `<div class="row"><span class="w">${w.word}</span> <span class="a">→ vos elegiste:</span> ${w.chose} <span class="a">· correcto:</span> <span class="c">${w.correct}</span></div>`
+    ).join('');
+  } else {
+    $('miss-section').classList.add('hidden');
+  }
+
+  const payload = {
+    exercise: 'speed_round',
+    session_start: state.sessionStart,
+    session_end: new Date().toISOString(),
+    mode: state.mode,
+    duration_seconds: state.duration,
+    score: state.score,
+    total_answered: total,
+    accuracy_percent: accuracy,
+    best_streak: state.bestStreak,
+    summary: { correct: state.correctAnswers.length, wrong: state.wrongAnswers.length },
+    correct_words: state.correctAnswers.map((c) => ({ notion_id: c.id, word: c.word, rating: 'good' })),
+    wrong_words: state.wrongAnswers.map((w) => ({ notion_id: w.id, word: w.word, chose: w.chose, correct: w.correct, rating: 'wrong' })),
+  };
+  $('json-box').textContent = JSON.stringify(payload, null, 2);
+  window._lastPayload = payload;
+}
+
+document.addEventListener('click', (e) => {
+  const opt = e.target.closest('.option-btn');
+  if (opt) answer(opt.dataset.text);
+});
+
+document.addEventListener('keydown', (e) => {
+  if ($('play-view').classList.contains('hidden')) return;
+  const n = parseInt(e.key, 10);
+  if (n >= 1 && n <= 4) {
+    const btns = document.querySelectorAll('.option-btn');
+    if (btns[n - 1]) answer(btns[n - 1].dataset.text);
+  }
+});
+
+$('duration').addEventListener('change', (e) => {
+  state.duration = parseInt(e.target.value, 10);
+  $('dur-label').textContent = state.duration;
+});
+$('mode').addEventListener('change', (e) => { state.mode = e.target.value; });
+$('start-btn').addEventListener('click', startGame);
+$('again-btn').addEventListener('click', startGame);
+
+$('copy-btn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(window._lastPayload, null, 2));
+    $('copy-btn').textContent = '✓ Copied!';
+    setTimeout(() => ($('copy-btn').textContent = '📋 Copy JSON'), 1500);
+  } catch (err) {
+    alert('Copy failed. Select the JSON text manually.');
+  }
+});
+
+$('download-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(window._lastPayload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `speed_results_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>
