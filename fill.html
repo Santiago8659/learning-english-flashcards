@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning English · Fill in the blanks</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #1a1d24; --panel-2: #232730;
+    --text: #e8eaf0; --muted: #8a91a0; --accent: #6aa6ff;
+    --good: #4ade80; --hard: #fbbf24; --bad: #f87171; --border: #2a2f3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 24px 16px;
+  }
+  header { width: 100%; max-width: 640px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  .back-link { color: var(--muted); text-decoration: none; font-size: 13px; }
+  .back-link:hover { color: var(--text); }
+  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  select, .btn { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .btn:hover { background: var(--panel-2); }
+  .progress-wrap { width: 100%; max-width: 640px; background: var(--panel); height: 6px; border-radius: 4px; margin-bottom: 12px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+  .meta { width: 100%; max-width: 640px; display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+  .sentence-card {
+    width: 100%; max-width: 640px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px; margin-bottom: 16px;
+  }
+  .pill { display: inline-block; padding: 3px 9px; border-radius: 10px; font-size: 11px; background: var(--panel-2); color: var(--muted); margin-right: 6px; margin-bottom: 14px; }
+  .pill.cefr { color: var(--accent); }
+  .sentence { font-size: 22px; line-height: 1.6; margin-bottom: 6px; }
+  .blank {
+    display: inline-block; min-width: 100px; padding: 2px 14px;
+    border-bottom: 2px dashed var(--accent); color: var(--accent); font-weight: 600;
+  }
+  .blank.revealed { color: var(--good); border-color: var(--good); }
+  .blank.revealed.wrong { color: var(--bad); border-color: var(--bad); }
+  .hint-line { font-size: 13px; color: var(--muted); margin-top: 14px; }
+
+  .options { width: 100%; max-width: 640px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .option-btn {
+    background: var(--panel); color: var(--text); border: 2px solid var(--border);
+    border-radius: 10px; padding: 14px; font-size: 15px; cursor: pointer; font-family: inherit;
+    text-align: left; transition: all 0.1s; min-height: 60px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .option-btn:hover:not(:disabled) { background: var(--panel-2); border-color: #3a4050; }
+  .option-btn:disabled { cursor: default; }
+  .option-btn .num { width: 22px; height: 22px; border-radius: 5px; background: var(--panel-2); color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .option-btn.correct { border-color: var(--good); background: rgba(74, 222, 128, 0.12); color: var(--good); }
+  .option-btn.wrong { border-color: var(--bad); background: rgba(248, 113, 113, 0.12); color: var(--bad); }
+
+  .type-input {
+    width: 100%; padding: 14px; font-size: 16px; background: var(--panel); border: 2px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: inherit;
+  }
+  .type-input:focus { outline: none; border-color: var(--accent); }
+  .type-row { width: 100%; max-width: 640px; display: flex; gap: 10px; }
+  .submit-btn { background: var(--accent); color: var(--bg); border: none; border-radius: 10px; padding: 0 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .submit-btn:hover { opacity: 0.9; }
+
+  .feedback { width: 100%; max-width: 640px; padding: 14px; border-radius: 10px; margin-top: 12px; font-size: 14px; }
+  .feedback.good { background: rgba(74, 222, 128, 0.1); border: 1px solid rgba(74, 222, 128, 0.3); color: var(--good); }
+  .feedback.bad { background: rgba(248, 113, 113, 0.1); border: 1px solid rgba(248, 113, 113, 0.3); color: var(--bad); }
+  .feedback .meaning { color: var(--muted); margin-top: 6px; font-size: 13px; }
+
+  .next-row { width: 100%; max-width: 640px; display: flex; justify-content: flex-end; margin-top: 12px; }
+
+  .results { width: 100%; max-width: 640px; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+  .results h2 { margin: 0 0 16px 0; font-size: 22px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--panel-2); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 700; }
+  .stat-num.good { color: var(--good); }
+  .stat-num.hard { color: var(--hard); }
+  .stat-num.bad { color: var(--bad); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .json-box { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; color: var(--muted); max-height: 200px; overflow: auto; margin: 12px 0; }
+  .end-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hidden { display: none !important; }
+  .footer { color: var(--muted); font-size: 11px; margin-top: 24px; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <a href="index.html" class="back-link">← Hub</a>
+    <h1 style="display:inline-block; margin-left:12px;">✍️ Fill in the blanks</h1>
+  </div>
+  <div class="controls">
+    <select id="mode">
+      <option value="mc" selected>Multiple choice</option>
+      <option value="type">Escribir respuesta</option>
+    </select>
+    <button class="btn" id="restart-btn">↻ Reset</button>
+  </div>
+</header>
+
+<div class="progress-wrap"><div class="progress-bar" id="bar"></div></div>
+<div class="meta">
+  <span id="counter">0 / 0</span>
+  <span id="session-stats">✓ 0 · ✗ 0</span>
+</div>
+
+<div id="study-view">
+  <div class="sentence-card">
+    <span class="pill cefr" id="pill-cefr"></span>
+    <span class="pill" id="pill-pos"></span>
+    <div class="sentence" id="sentence"></div>
+    <div class="hint-line" id="hint-line"></div>
+  </div>
+
+  <div class="options" id="options"></div>
+  <div class="type-row hidden" id="type-row">
+    <input class="type-input" id="type-input" type="text" placeholder="Type the missing word..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button class="submit-btn" id="submit-btn">Check</button>
+  </div>
+  <div id="feedback" class="hidden"></div>
+  <div class="next-row hidden" id="next-row">
+    <button class="btn" id="next-btn">Next →</button>
+  </div>
+</div>
+
+<div id="results-view" class="results hidden">
+  <h2>🎉 Fill-in-the-blanks complete</h2>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num good" id="s-correct">0</div><div class="stat-label">Correct</div></div>
+    <div class="stat-card"><div class="stat-num bad" id="s-wrong">0</div><div class="stat-label">Wrong</div></div>
+    <div class="stat-card"><div class="stat-num" id="s-accuracy">0%</div><div class="stat-label">Accuracy</div></div>
+  </div>
+  <div style="font-size: 13px; color: var(--muted); margin-bottom: 8px;">Copia el JSON y pégalo en el chat para actualizar tu progreso en Notion:</div>
+  <div class="json-box" id="json-box"></div>
+  <div class="end-actions">
+    <button class="btn" id="copy-btn">📋 Copy JSON</button>
+    <button class="btn" id="download-btn">💾 Download</button>
+    <button class="btn" id="again-btn">🔄 Practice again</button>
+  </div>
+</div>
+
+<div class="footer">Multiple choice: usá teclas 1/2/3/4 · Escribir: enter para chequear</div>
+
+<script src="vocab.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+
+let state = {
+  mode: 'mc',
+  deck: [],
+  index: 0,
+  answered: false,
+  results: {},
+  sessionStart: null,
+};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function normalize(s) {
+  return s.trim().toLowerCase().replace(/[.,!?;:]/g, '');
+}
+
+function buildBlankSentence(card) {
+  const word = card.word;
+  const example = card.example;
+  const escaped = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+  if (regex.test(example)) {
+    return example.replace(regex, '<span class="blank" id="blank">_____</span>');
+  }
+  return `<span class="blank" id="blank">_____</span> · ${example}`;
+}
+
+function startSession() {
+  state.deck = shuffle(window.VOCAB);
+  state.index = 0;
+  state.results = {};
+  state.sessionStart = new Date().toISOString();
+  $('results-view').classList.add('hidden');
+  $('study-view').classList.remove('hidden');
+  renderCard();
+}
+
+function renderCard() {
+  const card = state.deck[state.index];
+  if (!card) return showResults();
+  state.answered = false;
+
+  $('counter').textContent = `${state.index + 1} / ${state.deck.length}`;
+  $('bar').style.width = `${(state.index / state.deck.length) * 100}%`;
+  updateSessionStats();
+
+  $('pill-cefr').textContent = card.cefr;
+  $('pill-pos').textContent = card.pos;
+  $('sentence').innerHTML = buildBlankSentence(card);
+  $('hint-line').textContent = `💡 ${card.meaning}`;
+
+  $('feedback').classList.add('hidden');
+  $('next-row').classList.add('hidden');
+
+  if (state.mode === 'mc') {
+    $('options').classList.remove('hidden');
+    $('type-row').classList.add('hidden');
+    renderOptions(card);
+  } else {
+    $('options').classList.add('hidden');
+    $('type-row').classList.remove('hidden');
+    $('type-input').value = '';
+    $('type-input').disabled = false;
+    $('submit-btn').disabled = false;
+    setTimeout(() => $('type-input').focus(), 30);
+  }
+}
+
+function renderOptions(card) {
+  const samePos = window.VOCAB.filter((v) => v.id !== card.id && v.pos === card.pos);
+  const pool = samePos.length >= 3 ? samePos : window.VOCAB.filter((v) => v.id !== card.id);
+  const distractors = shuffle(pool).slice(0, 3).map((v) => v.word);
+  const options = shuffle([card.word, ...distractors]);
+
+  const opts = $('options');
+  opts.innerHTML = '';
+  options.forEach((text, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.dataset.text = text;
+    btn.innerHTML = `<span class="num">${idx + 1}</span> <span>${text}</span>`;
+    opts.appendChild(btn);
+  });
+}
+
+function answer(text) {
+  if (state.answered) return;
+  state.answered = true;
+  const card = state.deck[state.index];
+  const correct = normalize(text) === normalize(card.word);
+
+  if (state.mode === 'mc') {
+    document.querySelectorAll('.option-btn').forEach((btn) => {
+      btn.disabled = true;
+      if (normalize(btn.dataset.text) === normalize(card.word)) btn.classList.add('correct');
+      else if (normalize(btn.dataset.text) === normalize(text) && !correct) btn.classList.add('wrong');
+    });
+  } else {
+    $('type-input').disabled = true;
+    $('submit-btn').disabled = true;
+  }
+
+  const blank = $('blank');
+  if (blank) {
+    blank.textContent = card.word;
+    blank.classList.add('revealed');
+    if (!correct) blank.classList.add('wrong');
+  }
+
+  const fb = $('feedback');
+  fb.classList.remove('hidden', 'good', 'bad');
+  if (correct) {
+    fb.classList.add('good');
+    fb.innerHTML = `✅ ¡Correcto! <div class="meaning">${card.meaning} · <em>${card.es}</em></div>`;
+  } else {
+    fb.classList.add('bad');
+    fb.innerHTML = `❌ Era <strong>${card.word}</strong>. <div class="meaning">${card.meaning} · <em>${card.es}</em></div>`;
+  }
+
+  state.results[card.id] = {
+    word: card.word,
+    answer: text,
+    correct: correct,
+    rating: correct ? 'good' : 'wrong',
+  };
+  updateSessionStats();
+
+  $('next-row').classList.remove('hidden');
+  setTimeout(() => $('next-btn').focus(), 30);
+}
+
+function nextCard() {
+  state.index++;
+  if (state.index >= state.deck.length) showResults();
+  else renderCard();
+}
+
+function updateSessionStats() {
+  const vals = Object.values(state.results);
+  const c = vals.filter((r) => r.correct).length;
+  const w = vals.filter((r) => !r.correct).length;
+  $('session-stats').textContent = `✓ ${c} · ✗ ${w}`;
+}
+
+function showResults() {
+  $('study-view').classList.add('hidden');
+  $('results-view').classList.remove('hidden');
+  $('bar').style.width = '100%';
+
+  const vals = Object.values(state.results);
+  const c = vals.filter((r) => r.correct).length;
+  const w = vals.filter((r) => !r.correct).length;
+  const acc = vals.length > 0 ? Math.round((c / vals.length) * 100) : 0;
+
+  $('s-correct').textContent = c;
+  $('s-wrong').textContent = w;
+  $('s-accuracy').textContent = `${acc}%`;
+
+  const payload = {
+    exercise: 'fill_blanks',
+    session_start: state.sessionStart,
+    session_end: new Date().toISOString(),
+    mode: state.mode,
+    total: vals.length,
+    summary: { correct: c, wrong: w, accuracy_percent: acc },
+    results: Object.entries(state.results).map(([id, r]) => ({
+      notion_id: id, word: r.word, answer: r.answer, correct: r.correct, rating: r.rating,
+    })),
+  };
+  $('json-box').textContent = JSON.stringify(payload, null, 2);
+  window._lastPayload = payload;
+}
+
+document.addEventListener('click', (e) => {
+  const opt = e.target.closest('.option-btn');
+  if (opt && !state.answered) answer(opt.dataset.text);
+});
+
+$('submit-btn').addEventListener('click', () => {
+  if (state.mode === 'type' && !state.answered) answer($('type-input').value);
+});
+
+$('type-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !state.answered) answer($('type-input').value);
+});
+
+document.addEventListener('keydown', (e) => {
+  if ($('study-view').classList.contains('hidden')) return;
+  if (state.answered && (e.key === 'Enter' || e.key === ' ')) {
+    e.preventDefault();
+    nextCard();
+    return;
+  }
+  if (state.mode === 'mc' && !state.answered) {
+    const n = parseInt(e.key, 10);
+    if (n >= 1 && n <= 4) {
+      const btns = document.querySelectorAll('.option-btn');
+      if (btns[n - 1]) answer(btns[n - 1].dataset.text);
+    }
+  }
+});
+
+$('next-btn').addEventListener('click', nextCard);
+$('mode').addEventListener('change', (e) => { state.mode = e.target.value; startSession(); });
+$('restart-btn').addEventListener('click', startSession);
+$('again-btn').addEventListener('click', startSession);
+
+$('copy-btn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(window._lastPayload, null, 2));
+    $('copy-btn').textContent = '✓ Copied!';
+    setTimeout(() => ($('copy-btn').textContent = '📋 Copy JSON'), 1500);
+  } catch (err) { alert('Copy failed.'); }
+});
+
+$('download-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(window._lastPayload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `fill_blanks_results_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+startSession();
+</script>
+</body>
+</html>

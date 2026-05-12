@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning English · Mini-story + comprehension</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #1a1d24; --panel-2: #232730;
+    --text: #e8eaf0; --muted: #8a91a0; --accent: #6aa6ff;
+    --good: #4ade80; --hard: #fbbf24; --bad: #f87171; --border: #2a2f3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 24px 16px;
+  }
+  header { width: 100%; max-width: 720px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  .back-link { color: var(--muted); text-decoration: none; font-size: 13px; }
+  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  select, .btn { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .btn:hover { background: var(--panel-2); }
+  .big-btn { background: var(--accent); color: var(--bg); border: none; border-radius: 10px; padding: 12px 28px; font-size: 15px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .big-btn:hover { opacity: 0.9; }
+
+  .story-card {
+    width: 100%; max-width: 720px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 32px; margin-bottom: 16px;
+  }
+  .story-meta { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+  .pill { display: inline-block; padding: 3px 10px; border-radius: 10px; font-size: 11px; background: var(--panel-2); color: var(--muted); }
+  .pill.topic { background: rgba(106, 166, 255, 0.15); color: var(--accent); }
+  .pill.level { background: rgba(74, 222, 128, 0.12); color: var(--good); }
+  .story-title { font-size: 26px; font-weight: 700; margin: 0 0 18px 0; }
+  .story-body { font-size: 17px; line-height: 1.75; }
+  .story-body p { margin: 0 0 16px 0; }
+  .vocab-word {
+    color: var(--accent); font-weight: 600; border-bottom: 1px dotted var(--accent);
+    cursor: help; position: relative;
+  }
+  .vocab-word:hover { background: rgba(106, 166, 255, 0.1); border-radius: 3px; }
+  .vocab-tooltip {
+    position: absolute; bottom: calc(100% + 6px); left: 50%; transform: translateX(-50%);
+    background: var(--panel-2); border: 1px solid var(--border); border-radius: 8px;
+    padding: 8px 12px; min-width: 220px; max-width: 280px;
+    font-size: 12px; color: var(--text); font-weight: normal;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5); z-index: 10; text-align: left;
+    line-height: 1.5;
+  }
+  .vocab-tooltip .tw { color: var(--accent); font-weight: 600; }
+  .vocab-tooltip .ts { color: var(--muted); font-style: italic; }
+  .vocab-word:not(:hover) .vocab-tooltip { display: none; }
+
+  .vocab-list {
+    width: 100%; max-width: 720px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 12px; padding: 16px; margin-bottom: 16px;
+  }
+  .vocab-list-title { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+  .vocab-list-items { display: flex; flex-wrap: wrap; gap: 6px; }
+  .vocab-chip { background: var(--panel-2); border: 1px solid var(--border); padding: 4px 10px; border-radius: 8px; font-size: 12px; color: var(--accent); }
+
+  .nav-row {
+    width: 100%; max-width: 720px; display: flex; justify-content: space-between; gap: 10px; margin-bottom: 16px;
+  }
+
+  .question-card {
+    width: 100%; max-width: 720px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 28px; margin-bottom: 16px;
+  }
+  .q-counter { font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .q-text { font-size: 18px; line-height: 1.5; margin-bottom: 18px; }
+  .q-options { display: flex; flex-direction: column; gap: 10px; }
+  .q-option {
+    background: var(--panel-2); color: var(--text); border: 2px solid var(--border);
+    border-radius: 10px; padding: 14px 16px; font-size: 15px; cursor: pointer; font-family: inherit;
+    text-align: left; transition: all 0.1s; display: flex; gap: 10px; align-items: flex-start;
+  }
+  .q-option:hover:not(:disabled) { background: var(--panel); border-color: #3a4050; }
+  .q-option:disabled { cursor: default; }
+  .q-option .letter { width: 22px; height: 22px; border-radius: 5px; background: var(--bg); color: var(--muted); display: flex; align-items: center; justify-content: center; font-size: 11px; flex-shrink: 0; }
+  .q-option.correct { border-color: var(--good); background: rgba(74, 222, 128, 0.1); color: var(--good); }
+  .q-option.wrong { border-color: var(--bad); background: rgba(248, 113, 113, 0.1); color: var(--bad); }
+  .q-feedback { margin-top: 12px; padding: 12px; border-radius: 8px; font-size: 13px; line-height: 1.5; }
+  .q-feedback.good { background: rgba(74, 222, 128, 0.08); color: var(--good); border: 1px solid rgba(74, 222, 128, 0.25); }
+  .q-feedback.bad { background: rgba(248, 113, 113, 0.08); color: var(--bad); border: 1px solid rgba(248, 113, 113, 0.25); }
+
+  .results { width: 100%; max-width: 720px; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+  .results h2 { margin: 0 0 16px 0; font-size: 22px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--panel-2); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 700; }
+  .stat-num.good { color: var(--good); }
+  .stat-num.bad { color: var(--bad); }
+  .stat-num.accent { color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .json-box { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; color: var(--muted); max-height: 180px; overflow: auto; margin: 12px 0; }
+  .end-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hidden { display: none !important; }
+  .footer { color: var(--muted); font-size: 11px; margin-top: 24px; text-align: center; }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <a href="index.html" class="back-link">← Hub</a>
+    <h1 style="display:inline-block; margin-left:12px;">📖 Mini-story + comprehension</h1>
+  </div>
+  <div class="controls">
+    <select id="story-select"></select>
+  </div>
+</header>
+
+<div id="read-view">
+  <div class="story-card">
+    <div class="story-meta" id="story-meta"></div>
+    <h2 class="story-title" id="story-title"></h2>
+    <div class="story-body" id="story-body"></div>
+  </div>
+
+  <div class="vocab-list">
+    <div class="vocab-list-title">📚 Vocabulario que aparece</div>
+    <div class="vocab-list-items" id="vocab-list-items"></div>
+  </div>
+
+  <div class="nav-row">
+    <button class="btn" id="reread-btn">🔁 Releer</button>
+    <button class="big-btn" id="quiz-btn">Take comprehension quiz →</button>
+  </div>
+</div>
+
+<div id="quiz-view" class="hidden">
+  <div class="question-card">
+    <div class="q-counter" id="q-counter"></div>
+    <div class="q-text" id="q-text"></div>
+    <div class="q-options" id="q-options"></div>
+    <div id="q-feedback" class="q-feedback hidden"></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn" id="back-to-story-btn">← Volver al story</button>
+    <button class="big-btn hidden" id="next-q-btn">Next →</button>
+  </div>
+</div>
+
+<div id="results-view" class="results hidden">
+  <h2>🎉 Quiz complete</h2>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num good" id="r-correct">0</div><div class="stat-label">Correct</div></div>
+    <div class="stat-card"><div class="stat-num bad" id="r-wrong">0</div><div class="stat-label">Wrong</div></div>
+    <div class="stat-card"><div class="stat-num accent" id="r-acc">0%</div><div class="stat-label">Accuracy</div></div>
+  </div>
+  <div style="font-size: 13px; color: var(--muted); margin-bottom: 8px;">JSON para que Claude registre tu progreso con este topic:</div>
+  <div class="json-box" id="json-box"></div>
+  <div class="end-actions">
+    <button class="btn" id="copy-btn">📋 Copy JSON</button>
+    <button class="btn" id="another-btn">📚 Otra historia</button>
+    <button class="btn" id="retry-btn">🔄 Repetir esta</button>
+  </div>
+</div>
+
+<div class="footer">Pasá el mouse por las palabras subrayadas para ver su significado · Cada historia mezcla vocab + un topic</div>
+
+<script src="vocab.js"></script>
+<script>
+const STORIES = [
+  {
+    id: "tokyo-first-day",
+    title: "First day in Tokyo",
+    topic: "Travel & Japan",
+    level: "B1",
+    vocab_ids: [
+      "35eacf43-d4c9-815b-97af-f85c2d1e92da",
+      "35eacf43-d4c9-81f0-a26f-ca89783e5882",
+      "35eacf43-d4c9-81f3-864e-f2196d0de6ea",
+      "35eacf43-d4c9-810d-9b87-cd770d2470c6",
+      "35eacf43-d4c9-8177-8003-da9cb6fc1106",
+      "35eacf43-d4c9-81a5-be5f-dbae2011f6fc",
+      "35eacf43-d4c9-8141-bb7d-fd8ebc78ec32",
+      "35eacf43-d4c9-814e-b525-d3a1be36b68f",
+      "35eacf43-d4c9-81d4-aa32-cd7c004c1b12",
+      "35eacf43-d4c9-81c8-90cd-faa94bf3cecc",
+      "35eacf43-d4c9-81bf-95e6-cc38db8b312c",
+      "35eacf43-d4c9-8137-8e26-d0fa53a7b76d"
+    ],
+    paragraphs: [
+      "After flying for 14 hours, I finally landed in Tokyo. {despite} my tiredness, I felt excited. At the hotel, the receptionist greeted me with a {kind face} and perfect {manners}. She gave me {plenty of} information {regarding} the local trains.",
+      "That afternoon, I walked into a tiny ramen shop. The chef was pulling fresh noodles. My {jaw} dropped — the kitchen was art in motion.",
+      "I tried to order, but I couldn't {figure out} the menu. The chef smiled and pointed to his recommendation. I felt {at ease}, even though no one spoke English.",
+      "When the bowl arrived, I gave him many {compliments} in broken Japanese. He laughed. I had a {hunch} that this trip would change me — and I was {positive} that one day I'd come back, maybe even with a small ramen shop {of my own}."
+    ],
+    questions: [
+      {
+        q: "How did the receptionist make the traveler feel?",
+        options: ["Nervous", "Relaxed and welcomed", "Confused", "In a hurry"],
+        answer: 1,
+        explain: "She greeted him with a kind face and good manners, so he felt at ease."
+      },
+      {
+        q: "Why did the traveler's jaw drop in the ramen shop?",
+        options: ["The prices were high", "The chef was rude", "The cooking looked beautiful", "It was crowded"],
+        answer: 2,
+        explain: "His jaw dropped because the kitchen was 'art in motion' — the cooking was impressive."
+      },
+      {
+        q: "What did the traveler struggle with at the ramen shop?",
+        options: ["Paying with cash", "Figuring out the menu", "Finding the place", "Eating with chopsticks"],
+        answer: 1,
+        explain: "He couldn't figure out the menu (= no podía entenderlo)."
+      },
+      {
+        q: "What does 'I had a hunch' mean in the last paragraph?",
+        options: ["I felt sleepy", "I had a strong feeling without proof", "I was completely sure", "I was disappointed"],
+        answer: 1,
+        explain: "A hunch is an intuition — feeling something is true without proof."
+      },
+      {
+        q: "What does the traveler want one day?",
+        options: ["To work at the hotel", "To learn Japanese", "To have his own ramen shop", "To meet the receptionist again"],
+        answer: 2,
+        explain: "He says 'maybe even with a small ramen shop of my own' (= un local propio)."
+      }
+    ]
+  },
+  {
+    id: "missing-painting",
+    title: "The missing painting",
+    topic: "Mystery & Art",
+    level: "B2",
+    vocab_ids: [
+      "35eacf43-d4c9-812f-a478-f2af9aa64361",
+      "35eacf43-d4c9-8163-9430-d2a4be862148",
+      "35eacf43-d4c9-8172-a2a7-e96d678677a3",
+      "35eacf43-d4c9-81c8-90cd-faa94bf3cecc",
+      "35eacf43-d4c9-81bf-95e6-cc38db8b312c",
+      "35eacf43-d4c9-8141-bb7d-fd8ebc78ec32",
+      "35eacf43-d4c9-8140-8fb7-edb33b6ed32d",
+      "35eacf43-d4c9-8101-8f74-e63a81bfb387",
+      "35eacf43-d4c9-81b6-b0c7-ff1f3c6621c4",
+      "35eacf43-d4c9-819b-aab5-cb2c81b0fb08",
+      "35eacf43-d4c9-8178-ad07-cb609fbc697c",
+      "35eacf43-d4c9-8153-b9ff-c1ea5388b466"
+    ],
+    paragraphs: [
+      "Detective Reyes stood in the empty room. The painting was gone. \"Oh, {crap},\" she whispered. The museum director was already arguing with her.",
+      "\"This {has to do with} the new staff,\" he said. \"They {appear to} be innocent, but I have a {hunch}.\" {Therefore}, he wanted everyone questioned.",
+      "Reyes looked at the wall. Something {struck} her — the lighting was wrong. A real Vermeer reflects light through every brush stroke, but here the {brush strokes} were flat. \"I'm {positive} this is a {forgery},\" she said. \"The thief didn't steal the painting. They replaced it.\"",
+      "The director's eyes widened. \"How do you know?\" Reyes pointed to the canvas. Tiny {clues} were everywhere: a missing signature, the wrong shade of blue. \"We need to {figure out} when the swap happened. Whoever did it knew the schedule.\"",
+      "By midnight, Reyes had her answer. The new {dwarf}-sized security camera in the corner had recorded everything."
+    ],
+    questions: [
+      {
+        q: "What was Reyes's first reaction to the empty room?",
+        options: ["She was happy", "She was upset (said 'crap')", "She left immediately", "She called for backup"],
+        answer: 1,
+        explain: "'Crap' is a rude expression of frustration."
+      },
+      {
+        q: "Why did the director suspect the new staff?",
+        options: ["He had proof", "He had a hunch (an intuition without proof)", "They confessed", "They acted strangely"],
+        answer: 1,
+        explain: "He said 'I have a hunch' — feeling without proof."
+      },
+      {
+        q: "What 'struck' Reyes when she looked at the wall?",
+        options: ["A piece of glass hit her", "Something gave her a strong impression", "She remembered a clue", "She felt cold"],
+        answer: 1,
+        explain: "'Struck' here = gave her a strong feeling/idea. Same root as 'it strikes me as strange'."
+      },
+      {
+        q: "Why did Reyes conclude it was a forgery?",
+        options: ["The painting was too small", "The brush strokes looked flat (not like a real Vermeer)", "The frame was wrong", "The painting was hidden"],
+        answer: 1,
+        explain: "She noticed the brush strokes were flat — different from how a real Vermeer painting reflects light."
+      },
+      {
+        q: "What does 'figure out' mean in this story?",
+        options: ["To draw a figure", "To understand or find out (work out)", "To make a number", "To take a photo"],
+        answer: 1,
+        explain: "'Figure out' = averiguar / darse cuenta."
+      }
+    ]
+  },
+  {
+    id: "pottery-class",
+    title: "The pottery class",
+    topic: "Art & Hobbies",
+    level: "B1",
+    vocab_ids: [
+      "35eacf43-d4c9-8150-9047-c264f93d416a",
+      "35eacf43-d4c9-81fd-88b7-ed7ae809e1d6",
+      "35eacf43-d4c9-8163-9430-d2a4be862148",
+      "35eacf43-d4c9-8164-887c-d469f756f783",
+      "35eacf43-d4c9-8183-9ced-c69272a478af",
+      "35eacf43-d4c9-816c-8fb3-dfd09ca6a78b",
+      "35eacf43-d4c9-814e-b525-d3a1be36b68f",
+      "35eacf43-d4c9-81f0-a26f-ca89783e5882",
+      "35eacf43-d4c9-81e2-b7cc-f758df334b99",
+      "35eacf43-d4c9-8180-8570-ff4f46ae8eaa"
+    ],
+    paragraphs: [
+      "Maya signed up for a {pottery} class because the photo online looked {appealing}. On the first day she felt nervous, but the teacher had a {kind face} and welcomed her warmly.",
+      "\"Don't worry,\" he said with a smile. \"I {don't mind} if you make a mess. {Clay} forgives everything.\" Maya laughed and started to relax.",
+      "After half an hour her hands were covered in mud and her back hurt. \"I'm getting a {cramp},\" she said. The teacher told her to stand up and do some {stretches}.",
+      "Soon she felt {at ease}. She started painting small flowers on her bowl. The teacher watched and said, \"Look at your {brush strokes} — they have rhythm.\"",
+      "At the end of the class, her bowl wasn't perfect, but she was proud. \"I'm {sorry} it's so crooked,\" she said. \"Don't apologize,\" the teacher answered. \"Mistakes are how you learn.\""
+    ],
+    questions: [
+      {
+        q: "Why did Maya sign up for the class?",
+        options: ["A friend invited her", "The online photo looked appealing", "It was free", "She had no other option"],
+        answer: 1,
+        explain: "'Appealing' = attractive, something you want."
+      },
+      {
+        q: "What did the teacher mean by 'I don't mind'?",
+        options: ["He was annoyed", "It bothers him a lot", "It's not a problem for him", "He doesn't understand"],
+        answer: 2,
+        explain: "'Don't mind' = it's okay; no me molesta."
+      },
+      {
+        q: "What did Maya do when she got a cramp?",
+        options: ["Stopped the class", "Did some stretches", "Took a pill", "Drank water"],
+        answer: 1,
+        explain: "The teacher told her to do stretches (=estiramientos) to fix the cramp (=calambre)."
+      },
+      {
+        q: "What did the teacher praise about Maya's bowl?",
+        options: ["The color", "The brush strokes (pinceladas)", "The size", "The shape"],
+        answer: 1,
+        explain: "He said her brush strokes had rhythm."
+      },
+      {
+        q: "What's the teacher's view of mistakes?",
+        options: ["They ruin the work", "They are how you learn", "They are funny", "Avoid them at all costs"],
+        answer: 1,
+        explain: "He says 'mistakes are how you learn' — no need to be sorry."
+      }
+    ]
+  }
+];
+
+const $ = (id) => document.getElementById(id);
+const vocabById = (id) => window.VOCAB.find((v) => v.id === id);
+
+let state = {
+  storyIndex: 0,
+  qIndex: 0,
+  answers: [],
+  answered: false,
+  sessionStart: null,
+};
+
+function init() {
+  const sel = $('story-select');
+  STORIES.forEach((s, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `${s.title} · ${s.topic}`;
+    sel.appendChild(opt);
+  });
+  sel.addEventListener('change', (e) => {
+    state.storyIndex = parseInt(e.target.value, 10);
+    loadStory();
+  });
+  loadStory();
+}
+
+function loadStory() {
+  const story = STORIES[state.storyIndex];
+  state.qIndex = 0;
+  state.answers = [];
+  state.answered = false;
+  state.sessionStart = new Date().toISOString();
+
+  $('quiz-view').classList.add('hidden');
+  $('results-view').classList.add('hidden');
+  $('read-view').classList.remove('hidden');
+
+  $('story-title').textContent = story.title;
+  $('story-meta').innerHTML = `<span class="pill topic">📍 ${story.topic}</span><span class="pill level">${story.level}</span><span class="pill">${story.vocab_ids.length} palabras</span>`;
+
+  const body = $('story-body');
+  body.innerHTML = '';
+  story.paragraphs.forEach((p) => {
+    const para = document.createElement('p');
+    para.innerHTML = renderParagraph(p);
+    body.appendChild(para);
+  });
+
+  const list = $('vocab-list-items');
+  list.innerHTML = '';
+  story.vocab_ids.forEach((id) => {
+    const v = vocabById(id);
+    if (!v) return;
+    const chip = document.createElement('span');
+    chip.className = 'vocab-chip';
+    chip.textContent = v.word;
+    chip.title = `${v.meaning} · ${v.es}`;
+    list.appendChild(chip);
+  });
+}
+
+function renderParagraph(text) {
+  return text.replace(/\{([^}]+)\}/g, (_, label) => {
+    const lc = label.toLowerCase().trim();
+    let vocab = window.VOCAB.find((v) =>
+      v.word.toLowerCase() === lc ||
+      lc.includes(v.word.toLowerCase()) ||
+      v.word.toLowerCase().includes(lc.replace(/^(my|the|a|an) /, ''))
+    );
+    if (!vocab) {
+      const base = lc.replace(/^(my|the|a|an) /, '').replace(/s$/, '');
+      vocab = window.VOCAB.find((v) => v.word.toLowerCase().includes(base) || base.includes(v.word.toLowerCase().split(' ')[0]));
+    }
+    if (!vocab) return `<strong>${label}</strong>`;
+    const tooltip = `<span class="vocab-tooltip"><span class="tw">${vocab.word}</span> · <span class="ts">${vocab.es}</span><br>${vocab.meaning}</span>`;
+    return `<span class="vocab-word">${label}${tooltip}</span>`;
+  });
+}
+
+function startQuiz() {
+  state.qIndex = 0;
+  state.answers = [];
+  state.answered = false;
+  $('read-view').classList.add('hidden');
+  $('quiz-view').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const story = STORIES[state.storyIndex];
+  const q = story.questions[state.qIndex];
+  if (!q) return showResults();
+  state.answered = false;
+
+  $('q-counter').textContent = `Question ${state.qIndex + 1} / ${story.questions.length}`;
+  $('q-text').textContent = q.q;
+  $('q-feedback').classList.add('hidden');
+  $('next-q-btn').classList.add('hidden');
+
+  const opts = $('q-options');
+  opts.innerHTML = '';
+  q.options.forEach((opt, idx) => {
+    const btn = document.createElement('button');
+    btn.className = 'q-option';
+    btn.dataset.idx = idx;
+    btn.innerHTML = `<span class="letter">${String.fromCharCode(65 + idx)}</span> <span>${opt}</span>`;
+    opts.appendChild(btn);
+  });
+}
+
+function answerQuestion(idx) {
+  if (state.answered) return;
+  state.answered = true;
+  const story = STORIES[state.storyIndex];
+  const q = story.questions[state.qIndex];
+  const correct = idx === q.answer;
+
+  document.querySelectorAll('.q-option').forEach((btn) => {
+    btn.disabled = true;
+    const i = parseInt(btn.dataset.idx, 10);
+    if (i === q.answer) btn.classList.add('correct');
+    else if (i === idx && !correct) btn.classList.add('wrong');
+  });
+
+  const fb = $('q-feedback');
+  fb.classList.remove('hidden', 'good', 'bad');
+  if (correct) {
+    fb.classList.add('good');
+    fb.innerHTML = `✅ ¡Correcto! <div style="margin-top:6px; color:var(--muted);">${q.explain}</div>`;
+  } else {
+    fb.classList.add('bad');
+    fb.innerHTML = `❌ La respuesta correcta era <strong>${q.options[q.answer]}</strong>.<div style="margin-top:6px; color:var(--muted);">${q.explain}</div>`;
+  }
+
+  state.answers.push({ q: q.q, correct: correct, chosen: q.options[idx], answer: q.options[q.answer] });
+  $('next-q-btn').classList.remove('hidden');
+}
+
+function nextQuestion() {
+  state.qIndex++;
+  if (state.qIndex >= STORIES[state.storyIndex].questions.length) showResults();
+  else renderQuestion();
+}
+
+function showResults() {
+  $('quiz-view').classList.add('hidden');
+  $('results-view').classList.remove('hidden');
+
+  const c = state.answers.filter((a) => a.correct).length;
+  const w = state.answers.filter((a) => !a.correct).length;
+  const acc = state.answers.length > 0 ? Math.round((c / state.answers.length) * 100) : 0;
+  $('r-correct').textContent = c;
+  $('r-wrong').textContent = w;
+  $('r-acc').textContent = `${acc}%`;
+
+  const story = STORIES[state.storyIndex];
+  const payload = {
+    exercise: 'mini_story',
+    session_start: state.sessionStart,
+    session_end: new Date().toISOString(),
+    story_id: story.id,
+    story_title: story.title,
+    topic: story.topic,
+    vocab_encountered: story.vocab_ids,
+    summary: { correct: c, wrong: w, total: state.answers.length, accuracy_percent: acc },
+    answers: state.answers,
+  };
+  $('json-box').textContent = JSON.stringify(payload, null, 2);
+  window._lastPayload = payload;
+}
+
+document.addEventListener('click', (e) => {
+  const opt = e.target.closest('.q-option');
+  if (opt && !state.answered) answerQuestion(parseInt(opt.dataset.idx, 10));
+});
+
+$('quiz-btn').addEventListener('click', startQuiz);
+$('reread-btn').addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+$('back-to-story-btn').addEventListener('click', () => {
+  $('quiz-view').classList.add('hidden');
+  $('read-view').classList.remove('hidden');
+});
+$('next-q-btn').addEventListener('click', nextQuestion);
+$('another-btn').addEventListener('click', () => {
+  state.storyIndex = (state.storyIndex + 1) % STORIES.length;
+  $('story-select').value = state.storyIndex;
+  loadStory();
+});
+$('retry-btn').addEventListener('click', startQuiz);
+
+$('copy-btn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(window._lastPayload, null, 2));
+    $('copy-btn').textContent = '✓ Copied!';
+    setTimeout(() => ($('copy-btn').textContent = '📋 Copy JSON'), 1500);
+  } catch (err) { alert('Copy failed.'); }
+});
+
+init();
+</script>
+</body>
+</html>

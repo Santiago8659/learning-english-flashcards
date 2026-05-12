@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Learning English · Listen & spell</title>
+<style>
+  :root {
+    --bg: #0f1115; --panel: #1a1d24; --panel-2: #232730;
+    --text: #e8eaf0; --muted: #8a91a0; --accent: #6aa6ff;
+    --good: #4ade80; --hard: #fbbf24; --bad: #f87171; --border: #2a2f3a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg); color: var(--text); min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; padding: 24px 16px;
+  }
+  header { width: 100%; max-width: 640px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 18px; margin: 0; font-weight: 600; }
+  .back-link { color: var(--muted); text-decoration: none; font-size: 13px; }
+  .controls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  select, .btn { background: var(--panel); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .btn:hover { background: var(--panel-2); }
+  .progress-wrap { width: 100%; max-width: 640px; background: var(--panel); height: 6px; border-radius: 4px; margin-bottom: 12px; overflow: hidden; }
+  .progress-bar { height: 100%; background: var(--accent); width: 0%; transition: width 0.3s; }
+  .meta { width: 100%; max-width: 640px; display: flex; justify-content: space-between; font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+
+  .listen-card {
+    width: 100%; max-width: 640px; background: var(--panel); border: 1px solid var(--border);
+    border-radius: 16px; padding: 36px 28px; margin-bottom: 16px; text-align: center;
+  }
+  .hint-row { display: flex; gap: 6px; justify-content: center; margin-bottom: 18px; flex-wrap: wrap; }
+  .hint-pill { background: var(--panel-2); color: var(--muted); border-radius: 8px; padding: 4px 12px; font-size: 12px; }
+  .hint-pill.cefr { color: var(--accent); }
+  .hint-meaning { color: var(--muted); font-size: 14px; margin-bottom: 22px; line-height: 1.5; max-width: 480px; margin-left: auto; margin-right: auto; }
+  .play-btn {
+    background: var(--accent); color: var(--bg); border: none; border-radius: 50%;
+    width: 96px; height: 96px; font-size: 36px; cursor: pointer; margin-bottom: 8px;
+    transition: all 0.15s;
+  }
+  .play-btn:hover { transform: scale(1.05); }
+  .play-btn.playing { animation: pulse 1s infinite; }
+  @keyframes pulse { 50% { transform: scale(1.1); opacity: 0.8; } }
+  .play-label { font-size: 12px; color: var(--muted); margin-top: 6px; }
+  .speed-row { margin-top: 14px; display: flex; gap: 8px; justify-content: center; }
+  .speed-btn { background: var(--panel-2); border: 1px solid var(--border); color: var(--muted); border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer; font-family: inherit; }
+  .speed-btn.active { color: var(--accent); border-color: var(--accent); }
+
+  .input-row {
+    width: 100%; max-width: 640px; display: flex; gap: 10px; margin-bottom: 12px;
+  }
+  .type-input {
+    flex: 1; padding: 14px; font-size: 18px; background: var(--panel); border: 2px solid var(--border);
+    border-radius: 10px; color: var(--text); font-family: inherit; text-align: center;
+  }
+  .type-input:focus { outline: none; border-color: var(--accent); }
+  .submit-btn { background: var(--accent); color: var(--bg); border: none; border-radius: 10px; padding: 0 24px; font-size: 14px; font-weight: 600; cursor: pointer; font-family: inherit; }
+
+  .feedback { width: 100%; max-width: 640px; padding: 14px 16px; border-radius: 10px; margin-bottom: 12px; font-size: 14px; line-height: 1.5; }
+  .feedback.good { background: rgba(74, 222, 128, 0.08); color: var(--good); border: 1px solid rgba(74, 222, 128, 0.25); }
+  .feedback.bad { background: rgba(248, 113, 113, 0.08); color: var(--bad); border: 1px solid rgba(248, 113, 113, 0.25); }
+  .feedback .es { color: var(--muted); }
+
+  .next-row { width: 100%; max-width: 640px; display: flex; justify-content: flex-end; }
+
+  .results { width: 100%; max-width: 640px; background: var(--panel); border: 1px solid var(--border); border-radius: 16px; padding: 28px; }
+  .results h2 { margin: 0 0 16px 0; font-size: 22px; }
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .stat-card { background: var(--panel-2); border-radius: 10px; padding: 14px; text-align: center; }
+  .stat-num { font-size: 28px; font-weight: 700; }
+  .stat-num.good { color: var(--good); }
+  .stat-num.bad { color: var(--bad); }
+  .stat-num.accent { color: var(--accent); }
+  .stat-label { font-size: 11px; color: var(--muted); margin-top: 4px; }
+  .json-box { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px; font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 11px; color: var(--muted); max-height: 180px; overflow: auto; margin: 12px 0; }
+  .end-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+  .hidden { display: none !important; }
+  .footer { color: var(--muted); font-size: 11px; margin-top: 24px; text-align: center; }
+  .browser-warning {
+    width: 100%; max-width: 640px; padding: 16px; border-radius: 12px;
+    background: rgba(251, 191, 36, 0.1); border: 1px solid rgba(251, 191, 36, 0.3);
+    color: var(--hard); font-size: 13px; margin-bottom: 16px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div>
+    <a href="index.html" class="back-link">← Hub</a>
+    <h1 style="display:inline-block; margin-left:12px;">🎧 Listen & spell</h1>
+  </div>
+  <div class="controls">
+    <select id="hint-level">
+      <option value="full" selected>Hint: meaning + POS</option>
+      <option value="pos">Hint: only POS + CEFR</option>
+      <option value="none">No hints (hard mode)</option>
+    </select>
+    <select id="mode">
+      <option value="word" selected>Word only</option>
+      <option value="sentence">Full sentence (dictation)</option>
+    </select>
+    <button class="btn" id="restart-btn">↻ Reset</button>
+  </div>
+</header>
+
+<div id="warning" class="browser-warning hidden">
+  ⚠️ Tu navegador no soporta Speech Synthesis. Usá Chrome, Safari o Edge para escuchar las palabras.
+</div>
+
+<div class="progress-wrap"><div class="progress-bar" id="bar"></div></div>
+<div class="meta">
+  <span id="counter">0 / 0</span>
+  <span id="session-stats">✓ 0 · ✗ 0</span>
+</div>
+
+<div id="study-view">
+  <div class="listen-card">
+    <div class="hint-row" id="hint-row"></div>
+    <div class="hint-meaning" id="hint-meaning"></div>
+    <button class="play-btn" id="play-btn">🔊</button>
+    <div class="play-label">Click o presioná <strong>Space</strong> para escuchar</div>
+    <div class="speed-row">
+      <button class="speed-btn" data-rate="0.7">Slow</button>
+      <button class="speed-btn active" data-rate="0.9">Normal</button>
+      <button class="speed-btn" data-rate="1.1">Fast</button>
+    </div>
+  </div>
+
+  <div class="input-row">
+    <input class="type-input" id="type-input" type="text" placeholder="Type what you hear..." autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button class="submit-btn" id="submit-btn">Check</button>
+  </div>
+
+  <div id="feedback" class="feedback hidden"></div>
+  <div class="next-row hidden" id="next-row">
+    <button class="btn" id="next-btn">Next →</button>
+  </div>
+</div>
+
+<div id="results-view" class="results hidden">
+  <h2>🎉 Listen & spell complete</h2>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num good" id="r-correct">0</div><div class="stat-label">Correct</div></div>
+    <div class="stat-card"><div class="stat-num bad" id="r-wrong">0</div><div class="stat-label">Wrong</div></div>
+    <div class="stat-card"><div class="stat-num accent" id="r-acc">0%</div><div class="stat-label">Accuracy</div></div>
+  </div>
+  <div style="font-size: 13px; color: var(--muted); margin-bottom: 8px;">JSON para Claude:</div>
+  <div class="json-box" id="json-box"></div>
+  <div class="end-actions">
+    <button class="btn" id="copy-btn">📋 Copy JSON</button>
+    <button class="btn" id="download-btn">💾 Download</button>
+    <button class="btn" id="again-btn">🔄 Practice again</button>
+  </div>
+</div>
+
+<div class="footer">Tip: si una palabra es difícil, repetí el audio varias veces (Slow ayuda) · Enter para chequear · Space para reproducir</div>
+
+<script src="vocab.js"></script>
+<script>
+const $ = (id) => document.getElementById(id);
+
+let state = {
+  hintLevel: 'full',
+  mode: 'word',
+  rate: 0.9,
+  voice: null,
+  deck: [],
+  index: 0,
+  answered: false,
+  results: {},
+  sessionStart: null,
+};
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+function normalize(s) {
+  return s.trim().toLowerCase().replace(/[.,!?;:'"]/g, '').replace(/\s+/g, ' ');
+}
+
+function pickVoice() {
+  const voices = window.speechSynthesis.getVoices();
+  const preferred = voices.find((v) => v.lang.startsWith('en-US') && v.name.includes('Samantha'))
+    || voices.find((v) => v.lang.startsWith('en-US') && /female|samantha|victoria|allison/i.test(v.name))
+    || voices.find((v) => v.lang.startsWith('en-GB'))
+    || voices.find((v) => v.lang.startsWith('en'))
+    || voices[0];
+  state.voice = preferred;
+}
+
+function speak(text) {
+  if (!('speechSynthesis' in window)) return;
+  window.speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  if (state.voice) u.voice = state.voice;
+  u.rate = state.rate;
+  u.pitch = 1.0;
+  u.lang = 'en-US';
+  $('play-btn').classList.add('playing');
+  u.onend = () => $('play-btn').classList.remove('playing');
+  u.onerror = () => $('play-btn').classList.remove('playing');
+  window.speechSynthesis.speak(u);
+}
+
+function getCurrentText() {
+  const card = state.deck[state.index];
+  if (!card) return '';
+  return state.mode === 'word' ? card.word : card.example;
+}
+
+function startSession() {
+  state.deck = shuffle(window.VOCAB);
+  state.index = 0;
+  state.results = {};
+  state.sessionStart = new Date().toISOString();
+  $('results-view').classList.add('hidden');
+  $('study-view').classList.remove('hidden');
+  renderCard();
+}
+
+function renderCard() {
+  const card = state.deck[state.index];
+  if (!card) return showResults();
+  state.answered = false;
+
+  $('counter').textContent = `${state.index + 1} / ${state.deck.length}`;
+  $('bar').style.width = `${(state.index / state.deck.length) * 100}%`;
+  updateSessionStats();
+
+  const hintRow = $('hint-row');
+  const hintMeaning = $('hint-meaning');
+  hintRow.innerHTML = '';
+  hintMeaning.textContent = '';
+
+  if (state.hintLevel === 'full') {
+    hintRow.innerHTML = `<span class="hint-pill cefr">${card.cefr}</span><span class="hint-pill">${card.pos}</span><span class="hint-pill">${card.category}</span>`;
+    hintMeaning.textContent = `💡 ${card.meaning}`;
+  } else if (state.hintLevel === 'pos') {
+    hintRow.innerHTML = `<span class="hint-pill cefr">${card.cefr}</span><span class="hint-pill">${card.pos}</span>`;
+  }
+
+  $('type-input').value = '';
+  $('type-input').disabled = false;
+  $('submit-btn').disabled = false;
+  $('feedback').classList.add('hidden');
+  $('next-row').classList.add('hidden');
+
+  setTimeout(() => {
+    $('type-input').focus();
+    speak(getCurrentText());
+  }, 60);
+}
+
+function answer(text) {
+  if (state.answered) return;
+  state.answered = true;
+  const card = state.deck[state.index];
+  const expected = state.mode === 'word' ? card.word : card.example;
+  const correct = normalize(text) === normalize(expected);
+
+  $('type-input').disabled = true;
+  $('submit-btn').disabled = true;
+
+  const fb = $('feedback');
+  fb.classList.remove('hidden', 'good', 'bad');
+  if (correct) {
+    fb.classList.add('good');
+    fb.innerHTML = `✅ ¡Perfecto! <strong>${card.word}</strong> · <span class="es">${card.es}</span><br><span style="color:var(--muted);font-size:13px;">${card.meaning}</span>`;
+  } else {
+    fb.classList.add('bad');
+    fb.innerHTML = `❌ Era: <strong>${expected}</strong> · <span class="es">${card.es}</span><br><span style="color:var(--muted);font-size:13px;">Vos escribiste: "${text || '(vacío)'}"</span>`;
+  }
+
+  state.results[card.id] = {
+    word: card.word,
+    expected: expected,
+    answer: text,
+    correct: correct,
+    rating: correct ? 'good' : 'wrong',
+  };
+  updateSessionStats();
+  $('next-row').classList.remove('hidden');
+  setTimeout(() => $('next-btn').focus(), 30);
+}
+
+function nextCard() {
+  state.index++;
+  if (state.index >= state.deck.length) showResults();
+  else renderCard();
+}
+
+function updateSessionStats() {
+  const vals = Object.values(state.results);
+  const c = vals.filter((r) => r.correct).length;
+  const w = vals.filter((r) => !r.correct).length;
+  $('session-stats').textContent = `✓ ${c} · ✗ ${w}`;
+}
+
+function showResults() {
+  $('study-view').classList.add('hidden');
+  $('results-view').classList.remove('hidden');
+  $('bar').style.width = '100%';
+
+  const vals = Object.values(state.results);
+  const c = vals.filter((r) => r.correct).length;
+  const w = vals.filter((r) => !r.correct).length;
+  const acc = vals.length > 0 ? Math.round((c / vals.length) * 100) : 0;
+  $('r-correct').textContent = c;
+  $('r-wrong').textContent = w;
+  $('r-acc').textContent = `${acc}%`;
+
+  const payload = {
+    exercise: 'listen_spell',
+    session_start: state.sessionStart,
+    session_end: new Date().toISOString(),
+    mode: state.mode,
+    hint_level: state.hintLevel,
+    total: vals.length,
+    summary: { correct: c, wrong: w, accuracy_percent: acc },
+    results: Object.entries(state.results).map(([id, r]) => ({
+      notion_id: id, word: r.word, expected: r.expected, answer: r.answer, correct: r.correct, rating: r.rating,
+    })),
+  };
+  $('json-box').textContent = JSON.stringify(payload, null, 2);
+  window._lastPayload = payload;
+}
+
+if (!('speechSynthesis' in window)) {
+  $('warning').classList.remove('hidden');
+} else {
+  pickVoice();
+  window.speechSynthesis.onvoiceschanged = pickVoice;
+}
+
+$('play-btn').addEventListener('click', () => speak(getCurrentText()));
+$('submit-btn').addEventListener('click', () => { if (!state.answered) answer($('type-input').value); });
+$('next-btn').addEventListener('click', nextCard);
+
+$('type-input').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !state.answered) answer($('type-input').value);
+});
+
+document.addEventListener('keydown', (e) => {
+  if ($('study-view').classList.contains('hidden')) return;
+  if (e.code === 'Space' && document.activeElement !== $('type-input')) {
+    e.preventDefault();
+    speak(getCurrentText());
+  }
+  if (state.answered && (e.key === 'Enter' || e.code === 'Space')) {
+    if (document.activeElement === $('next-btn')) return;
+    e.preventDefault();
+    nextCard();
+  }
+});
+
+document.querySelectorAll('.speed-btn').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.speed-btn').forEach((b) => b.classList.remove('active'));
+    btn.classList.add('active');
+    state.rate = parseFloat(btn.dataset.rate);
+  });
+});
+
+$('hint-level').addEventListener('change', (e) => { state.hintLevel = e.target.value; renderCard(); });
+$('mode').addEventListener('change', (e) => { state.mode = e.target.value; startSession(); });
+$('restart-btn').addEventListener('click', startSession);
+$('again-btn').addEventListener('click', startSession);
+
+$('copy-btn').addEventListener('click', async () => {
+  try {
+    await navigator.clipboard.writeText(JSON.stringify(window._lastPayload, null, 2));
+    $('copy-btn').textContent = '✓ Copied!';
+    setTimeout(() => ($('copy-btn').textContent = '📋 Copy JSON'), 1500);
+  } catch (err) { alert('Copy failed.'); }
+});
+
+$('download-btn').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify(window._lastPayload, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `listen_results_${new Date().toISOString().slice(0, 10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+});
+
+startSession();
+</script>
+</body>
+</html>
