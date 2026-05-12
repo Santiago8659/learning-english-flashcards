@@ -122,9 +122,12 @@
     <button class="play-btn" id="play-btn">🔊</button>
     <div class="play-label">Click o presioná <strong>Space</strong> para escuchar</div>
     <div class="speed-row">
-      <button class="speed-btn" data-rate="0.7">Slow</button>
-      <button class="speed-btn active" data-rate="0.9">Normal</button>
-      <button class="speed-btn" data-rate="1.1">Fast</button>
+      <button class="speed-btn" data-rate="0.5">🐢 Slow</button>
+      <button class="speed-btn active" data-rate="1.0">Normal</button>
+      <button class="speed-btn" data-rate="1.5">🐇 Fast</button>
+    </div>
+    <div class="speed-row" style="margin-top: 8px;">
+      <select id="voice-select" style="background: var(--panel-2); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 4px 10px; font-size: 12px; font-family: inherit; max-width: 280px;"></select>
     </div>
   </div>
 
@@ -187,13 +190,34 @@ function normalize(s) {
 }
 
 function pickVoice() {
-  const voices = window.speechSynthesis.getVoices();
-  const preferred = voices.find((v) => v.lang.startsWith('en-US') && v.name.includes('Samantha'))
-    || voices.find((v) => v.lang.startsWith('en-US') && /female|samantha|victoria|allison/i.test(v.name))
-    || voices.find((v) => v.lang.startsWith('en-GB'))
-    || voices.find((v) => v.lang.startsWith('en'))
-    || voices[0];
-  state.voice = preferred;
+  const voices = window.speechSynthesis.getVoices().filter((v) => v.lang.startsWith('en'));
+  if (!voices.length) return;
+
+  const sel = $('voice-select');
+  const currentVal = sel.value;
+  sel.innerHTML = '';
+  voices.forEach((v, i) => {
+    const opt = document.createElement('option');
+    opt.value = i;
+    opt.textContent = `${v.name} (${v.lang})${v.localService ? '' : ' · online'}`;
+    sel.appendChild(opt);
+  });
+
+  let preferredIdx = voices.findIndex((v) => /google/i.test(v.name) && v.lang === 'en-US');
+  if (preferredIdx === -1) preferredIdx = voices.findIndex((v) => /microsoft/i.test(v.name) && v.lang.startsWith('en-US'));
+  if (preferredIdx === -1) preferredIdx = voices.findIndex((v) => !v.localService && v.lang.startsWith('en-US'));
+  if (preferredIdx === -1) preferredIdx = voices.findIndex((v) => v.lang === 'en-US');
+  if (preferredIdx === -1) preferredIdx = 0;
+
+  const savedName = localStorage.getItem('listen_voice_name');
+  if (savedName) {
+    const savedIdx = voices.findIndex((v) => v.name === savedName);
+    if (savedIdx !== -1) preferredIdx = savedIdx;
+  }
+
+  sel.value = currentVal !== '' && voices[currentVal] ? currentVal : preferredIdx;
+  state.voiceList = voices;
+  state.voice = voices[parseInt(sel.value, 10)];
 }
 
 function speak(text) {
@@ -366,7 +390,17 @@ document.querySelectorAll('.speed-btn').forEach((btn) => {
     document.querySelectorAll('.speed-btn').forEach((b) => b.classList.remove('active'));
     btn.classList.add('active');
     state.rate = parseFloat(btn.dataset.rate);
+    speak(getCurrentText());
   });
+});
+
+$('voice-select').addEventListener('change', (e) => {
+  const idx = parseInt(e.target.value, 10);
+  if (state.voiceList && state.voiceList[idx]) {
+    state.voice = state.voiceList[idx];
+    localStorage.setItem('listen_voice_name', state.voice.name);
+    speak(getCurrentText());
+  }
 });
 
 $('hint-level').addEventListener('change', (e) => { state.hintLevel = e.target.value; renderCard(); });
